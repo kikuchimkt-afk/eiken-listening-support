@@ -291,7 +291,414 @@
         }
       };
 
-      // --- RENDER: LIBRARY MODE ---
+      // --- Helper: Blob/Url Handling ---
+      const blobUrlToBlob = async (blobUrl) => {
+        const response = await fetch(blobUrl);
+        return await response.blob();
+      };
+
+      const blobUrlToBase64 = async (blobUrl) => {
+        const blob = await blobUrlToBlob(blobUrl);
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      const loadServerAudio = async (url, name) => {
+        if (!url) return;
+        if (audioSrc && !confirm("音声を切り替えますか？")) return;
+
+        setIsLoading(true);
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Fetch failed");
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          setAudioSrc(blobUrl);
+          setAudioFileName(name);
+          setCurrentTime(0);
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+          }
+        } catch (e) {
+          console.error(e);
+          alert("音声ファイルの読み込みに失敗しました。");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      // --- Actions ---
+      const startNewProject = () => {
+        setProjectId(Date.now().toString()); // Temporary ID
+        setProjectTitle("無題のプロジェクト");
+        setPages([]);
+        setMarkers([]);
+        setAudioSrc(null);
+        setAudioFileName(null);
+        setCurrentPageIndex(0);
+        setMode('edit');
+      };
+
+      const handleOpenProject = async (id) => {
+        setIsLoading(true);
+        try {
+          const project = await getProjectFromDB(id);
+          if (!project) throw new Error("Project not found");
+
+          // Restore Pages (Blob -> Blob URL)
+          const restoredPages = project.pages.map(p => ({
+            ...p,
+            src: URL.createObjectURL(p.blob)
+          }));
+
+          // Restore Audio
+          if (project.audio) {
+            setAudioSrc(URL.createObjectURL(project.audio.blob));
+            setAudioFileName(project.audio.name);
+          } else {
+            setAudioSrc(null);
+            setAudioFileName(null);
+          }
+
+          setProjectId(project.id);
+          setProjectTitle(project.title);
+          setPages(restoredPages);
+          setMarkers(project.markers);
+          setCurrentPageIndex(0);
+          setMode('practice');
+        } catch (e) {
+          console.error("Failed to open project", e);
+          alert("プロジェクトを開けませんでした。");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const handleDeleteProject = async (id, e) => {
+        e.stopPropagation();
+        if (!window.confirm("このプロジェクトを削除してもよろしいですか？\nこの操作は取り消せません。")) return;
+
+        setIsLoading(true);
+        try {
+          await deleteProjectFromDB(id);
+          await refreshLibrary();
+        } catch (e) {
+          console.error("Failed to delete", e);
+          alert("削除に失敗しました。");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const handleSaveToDB = async () => {
+        if (pages.length === 0 && !audioSrc) {
+          alert("保存するデータがありません。");
+          return;
+        }
+
+        const titleInput = prompt("プロジェクト名を入力してください", projectTitle);
+        if (titleInput === null) return;
+        const finalTitle = titleInput || "無題のプロジェクト";
+        setProjectTitle(finalTitle);
+
+        setIsLoading(true);
+        try {
+          const pagesForDB = await Promise.all(pages.map(async (p) => ({
+            id: p.id,
+            name: p.name,
+            blob: await blobUrlToBlob(p.src)
+          })));
+
+          let audioForDB = null;
+          if (audioSrc) {
+            audioForDB = {
+              name: audioFileName,
+              blob: await blobUrlToBlob(audioSrc)
+            };
+          }
+
+          const projectData = {
+            id: projectId,
+            title: finalTitle,
+            updatedAt: new Date().toISOString(),
+            markers,
+            pages: pagesForDB,
+            audio: audioForDB
+          };
+
+          await saveProjectToDB(projectData);
+          alert("データベースに保存しました！");
+          await refreshLibrary();
+        } catch (e) {
+          console.error("Save failed", e);
+          alert("保存に失敗しました。");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      // JSON Export (Backup)
+      const handleExportJSON = async () => {
+        if (pages.length === 0 && !audioSrc) return;
+        setIsLoading(true);
+        try {
+          const serializedPages = await Promise.all(pages.map(async (p) => ({
+            ...p,
+            src: await blobUrlToBase64(p.src)
+          })));
+
+          let serializedAudio = null;
+          if (audioSrc) {
+            serializedAudio = {
+              name: audioFileName,
+              data: await blobUrlToBase64(audioSrc)
+            };
+          }
+
+          const projectData = {
+            version: "1.0",
+            timestamp: new Date().toISOString(),
+            title: projectTitle,
+            markers,
+            pages: serializedPages,
+            audio: serializedAudio
+          };
+
+          const jsonString = JSON.stringify(projectData);
+          const blob = new Blob([jsonString], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${projectTitle.replace(/\s+/g, '_')}_Backup.json`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          console.error(e);
+          alert("エクスポート失敗");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      // --- File Processing ---
+      const processFiles = useCallback((files) => {
+        const imageFiles = [];
+        let audioFile = null;
+
+        files.forEach(file => {
+          if (file.type.startsWith('image/')) {
+            imageFiles.push(file);
+          } else if (file.type.startsWith('audio/')) {
+            audioFile = file;
+          } else if (file.name.endsWith('.json')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              try {
+                const data = JSON.parse(e.target.result);
+                alert("JSONファイルはライブラリ画面の「インポート」機能、または現在編集中なら読み込みボタンを使用してください。");
+              } catch (err) { console.error(err); }
+            };
+            reader.readAsText(file);
+          }
+        });
+
+        if (imageFiles.length > 0) {
+          imageFiles.sort((a, b) => a.name.localeCompare(b.name));
+          const newPages = imageFiles.map(file => ({
+            id: Date.now() + Math.random().toString(36).substr(2, 9),
+            src: URL.createObjectURL(file),
+            name: file.name || "Pasted Image"
+          }));
+          setPages(prev => [...prev, ...newPages]);
+        }
+
+        if (audioFile) {
+          setAudioSrc(URL.createObjectURL(audioFile));
+          setAudioFileName(audioFile.name);
+        }
+      }, []);
+
+      // --- Interaction & Events ---
+      const handleMarkerMouseDown = (e, marker, type) => {
+        if (mode !== 'edit') return;
+        e.stopPropagation();
+        setInteractionState({
+          type,
+          markerId: marker.id,
+          startX: e.clientX,
+          startY: e.clientY,
+          initialData: { x: marker.x, y: marker.y, width: marker.width, height: marker.height }
+        });
+        setSelectedMarkerId(marker.id);
+      };
+
+      useEffect(() => {
+        const handleMouseMove = (e) => {
+          if (!interactionState.type || !imageContainerRef.current) return;
+          const rect = imageContainerRef.current.getBoundingClientRect();
+          const deltaX_px = e.clientX - interactionState.startX;
+          const deltaY_px = e.clientY - interactionState.startY;
+          const deltaX_pct = (deltaX_px / rect.width) * 100;
+          const deltaY_pct = (deltaY_px / rect.height) * 100;
+
+          setMarkers(prev => prev.map(m => {
+            if (m.id !== interactionState.markerId) return m;
+            if (interactionState.type === 'move') {
+              return {
+                ...m,
+                x: interactionState.initialData.x + deltaX_pct,
+                y: interactionState.initialData.y + deltaY_pct
+              };
+            } else if (interactionState.type === 'resize') {
+              return {
+                ...m,
+                width: Math.max(2, interactionState.initialData.width + deltaX_pct),
+                height: Math.max(2, interactionState.initialData.height + deltaY_pct)
+              };
+            }
+            return m;
+          }));
+        };
+        const handleMouseUp = () => {
+          if (interactionState.type) {
+            setInteractionState({ type: null, markerId: null, startX: 0, startY: 0, initialData: null });
+          }
+        };
+        if (interactionState.type) {
+          window.addEventListener('mousemove', handleMouseMove);
+          window.addEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mouseup', handleMouseUp);
+        };
+      }, [interactionState]);
+
+      const handleDragOver = (e) => { e.preventDefault(); setIsDraggingOver(true); };
+      const handleDragLeave = (e) => { e.preventDefault(); setIsDraggingOver(false); };
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDraggingOver(false);
+        processFiles(Array.from(e.dataTransfer.files));
+      };
+
+      useEffect(() => {
+        const handlePaste = (e) => {
+          if (mode === 'library') return;
+          if (e.clipboardData && e.clipboardData.items) {
+            const items = e.clipboardData.items;
+            const files = [];
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                const file = new File([blob], `Pasted Image ${new Date().toLocaleTimeString()}`, { type: blob.type });
+                files.push(file);
+              }
+            }
+            if (files.length > 0) processFiles(files);
+          }
+        };
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+      }, [processFiles, mode]);
+
+      // --- Navigation ---
+      const goToNextPage = () => { if (currentPageIndex < pages.length - 1) setCurrentPageIndex(prev => prev + 1); };
+      const goToPrevPage = () => { if (currentPageIndex > 0) setCurrentPageIndex(prev => prev - 1); };
+      const deletePage = (index) => {
+        const pageToDelete = pages[index];
+        setMarkers(prev => prev.filter(m => m.pageId !== pageToDelete.id));
+        const newPages = pages.filter((_, i) => i !== index);
+        setPages(newPages);
+        if (currentPageIndex >= newPages.length) setCurrentPageIndex(Math.max(0, newPages.length - 1));
+      };
+
+      // --- Marker Ops ---
+      const addMarker = (e) => {
+        if (mode !== 'edit' || !imageContainerRef.current || pages.length === 0) return;
+        if (interactionState.type) return;
+        const rect = imageContainerRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        const currentPage = pages[currentPageIndex];
+        const newMarker = {
+          id: Date.now(), x, y, width: 10, height: 5, startTime: 0, endTime: 10,
+          label: `Q${markers.length + 1}`, pageId: currentPage.id
+        };
+        setMarkers([...markers, newMarker]);
+        setSelectedMarkerId(newMarker.id);
+      };
+      const updateMarker = (id, field, value) => setMarkers(markers.map(m => m.id === id ? { ...m, [field]: value } : m));
+      const deleteMarker = (id) => {
+        setMarkers(markers.filter(m => m.id !== id));
+        if (selectedMarkerId === id) setSelectedMarkerId(null);
+      };
+
+      // --- Audio Ops ---
+      const playSegment = (marker) => {
+        if (!audioRef.current) return;
+        const targetPageIndex = pages.findIndex(p => p.id === marker.pageId);
+        if (targetPageIndex !== -1 && targetPageIndex !== currentPageIndex) setCurrentPageIndex(targetPageIndex);
+        audioRef.current.playbackRate = playbackRate;
+        audioRef.current.pause();
+        audioRef.current.currentTime = marker.startTime;
+        setCurrentMarkerId(marker.id);
+        audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
+      };
+      const togglePlay = () => {
+        if (!audioRef.current) return;
+        audioRef.current.playbackRate = playbackRate;
+        if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+        else { audioRef.current.play(); setIsPlaying(true); }
+      };
+      const toggleSpeed = () => {
+        const newRate = playbackRate === 1.0 ? 2.0 : 1.0;
+        setPlaybackRate(newRate);
+        if (audioRef.current) audioRef.current.playbackRate = newRate;
+      };
+      const seekRelative = (s) => {
+        if (!audioRef.current) return;
+        audioRef.current.currentTime = Math.min(Math.max(audioRef.current.currentTime + s, 0), duration);
+        setCurrentTime(audioRef.current.currentTime);
+      };
+      useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const handleTimeUpdate = () => {
+          setCurrentTime(audio.currentTime);
+          if (currentMarkerId && isPlaying) {
+            const activeMarker = markers.find(m => m.id === currentMarkerId);
+            if (activeMarker && audio.currentTime >= activeMarker.endTime) {
+              audio.pause(); setIsPlaying(false); setCurrentMarkerId(null); audio.currentTime = activeMarker.startTime;
+            }
+          }
+        };
+        const handleLoadedMetadata = () => setDuration(audio.duration);
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.playbackRate = playbackRate;
+        return () => {
+          audio.removeEventListener('timeupdate', handleTimeUpdate);
+          audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        };
+      }, [currentMarkerId, isPlaying, markers, playbackRate]);
+
+      const formatTime = (time) => {
+        if (isNaN(time)) return "0:00";
+        const m = Math.floor(time / 60);
+        const s = Math.floor(time % 60);
+        const ms = Math.floor((time % 1) * 10);
+        return `${m}:${s.toString().padStart(2, '0')}.${ms}`;
+      };
+
+      const currentPage = pages[currentPageIndex];
+      const currentMarkers = currentPage ? markers.filter(m => m.pageId === currentPage.id) : [];
       if (mode === 'library') {
         return (
           <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
