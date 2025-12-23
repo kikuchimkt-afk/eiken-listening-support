@@ -914,9 +914,10 @@
                           <div>
                             <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition">
                               {project.title
-                                .replace(/(\d{4}) Session (\d+)/, '$1年度 第$2回')
-                                .replace(/Eiken Grade Pre-2/, '英検準2級')
-                                .replace(/Eiken Grade (\d+)/, '英検$1級')}
+                                .replace(/(\d{4}) Session (\d+) Eiken Grade Pre-2/, '$1年度 第$2回 英検準2級')
+                                .replace(/(\d{4}) Session (\d+) Eiken Grade (\d+)/, '$1年度 第$2回 英検$3級')
+                                .replace(/(\d{4}) Eiken Grade Pre-2/, '$1 英検準2級')
+                                .replace(/(\d{4}) Eiken Grade (\d+)/, '$1 英検$2級')}
                             </h3>
                             <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
                               <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} pages</span>
