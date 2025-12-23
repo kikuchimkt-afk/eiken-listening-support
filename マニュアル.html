@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英検リスニングアプリ 教材追加マニュアル</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+        /* A4 Reset & Base Styles */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0;
+            font-family: 'Noto Sans JP', sans-serif;
+            color: #333;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .page {
+            width: 210mm;
+            height: 296mm;
+            /* A4 Height */
+            background: white;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: none;
+            }
+
+            .page {
+                margin: 0;
+                box-shadow: none;
+                height: 100vh;
+                page-break-after: always;
+            }
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 24pt;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
+
+        .subtitle {
+            font-size: 12pt;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .version {
+            font-size: 10pt;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        /* Content */
+        .content {
+            padding: 30px 40px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Introduction */
+        .intro {
+            background: #eff6ff;
+            border-left: 6px solid #2563eb;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .intro p {
+            margin: 0;
+            font-size: 11pt;
+            line-height: 1.6;
+        }
+
+        .intro strong {
+            color: #1e40af;
+        }
+
+        /* Steps */
+        .step {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            background: #2563eb;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18pt;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .step-body {
+            flex-grow: 1;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .step-body::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            /* overlap border */
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-left: 2px solid #e5e7eb;
+            border-bottom: 2px solid #e5e7eb;
+            transform: rotate(45deg);
+        }
+
+        .step h2 {
+            margin: 0 0 10px 0;
+            color: #1e40af;
+            font-size: 16pt;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step p {
+            margin: 0;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+
+        /* Visuals within steps */
+        .file-icon {
+            display: inline-flex;
+            align-items: center;
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            margin: 0 2px;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 5px;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        /* Tips Area */
+        .tips-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: auto;
+        }
+
+        .tip-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .tip-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 12pt;
+            color: #4b5563;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+
+        .tip-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .tip-box li {
+            margin-bottom: 5px;
+            font-size: 10pt;
+            color: #6b7280;
+        }
+
+        /* Footer */
+        footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+        <header>
+            <div>
+                <h1>英検リスニング演習</h1>
+                <div class="subtitle">新規教材追加マニュアル（管理者・講師用）</div>
+            </div>
+            <div class="version">Ver 1.0</div>
+        </header>
+
+        <div class="content">
+            <div class="intro">
+                <p>このアプリでは、簡単な手順で新しい過去問や演習問題を追加できます。<br>
+                    必要なファイル（音声とデータ）を用意して、以下の<strong>3ステップ</strong>を実行してください。</p>
+            </div>
+
+            <!-- STEP 1 -->
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h2>フォルダの準備</h2>
+                    <p>
+                        <span class="file-icon">【1】新規フォルダ作成.bat</span> をダブルクリックします。<br>
+                        画面の指示に従って、追加したい教材の <strong>「年度」「回」「級」</strong> を入力してください。<br>
+                        <span class="highlight">入力が終わると、自動的に新しいフォルダが開きます。</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h2>ファイルの配置</h2>
+                    <p>
+                        自動で開いたフォルダの中に、以下のデータファイルをコピーして入れてください。<br><br>
+                        📂 <strong>入れるもの：</strong><br>
+                        1. <strong>音声ファイル (.mp3)</strong> <br>
+                        &nbsp;&nbsp;&nbsp;例: <span class="file-icon">part1.mp3</span> <span
+                            class="file-icon">part2.mp3</span><br>
+                        2. <strong>問題データ (.json)</strong> <br>
+                        &nbsp;&nbsp;&nbsp;必ず <span class="file-icon">data.json</span> という名前で入れてください。
+                    </p>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h2>アプリの更新</h2>
+                    <p>
+                        ファイルの配置が終わったら、<span class="file-icon">【2】アプリ更新.bat</span> をダブルクリックします。<br>
+                        黒い画面に「Success!」と表示されれば完了です。<br><br>
+                        アプリ画面（ブラウザ）を開き、リスト上の <strong>「↻ カタログ更新」</strong> ボタンを押すと、新しい教材が表示されます。
+                    </p>
+                </div>
+            </div>
+
+            <div class="tips-area">
+                <div class="tip-box">
+                    <h3>⚠️ 音声ファイル名のルール</h3>
+                    <ul>
+                        <li>ファイル名に <code>part1</code>, <code>part2</code> のように数字を含めてください。</li>
+                        <li>アプリは自動的に「Part 1」「Part 2」として認識します。</li>
+                        <li>MP3形式のみ対応しています。</li>
+                    </ul>
+                </div>
+                <div class="tip-box">
+                    <h3>💡 うまくいかない時は？</h3>
+                    <ul>
+                        <li><strong>表示されない：</strong> 「カタログ更新」ボタンを押しましたか？</li>
+                        <li><strong>音声が出ない：</strong> STEP 2 で正しいフォルダに入れましたか？</li>
+                        <li><strong>文字化けする：</strong> ファイル名は半角英数字を推奨します。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            © 2025 English Listening Support System | Designed for Teachers
+        </footer>
+    </div>
+
+</body>
+
+</html>

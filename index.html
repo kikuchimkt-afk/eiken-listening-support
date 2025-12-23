@@ -608,12 +608,44 @@
         };
       }, [interactionState]);
 
-      const handleDragOver = (e) => { e.preventDefault(); setIsDraggingOver(true); };
-      const handleDragLeave = (e) => { e.preventDefault(); setIsDraggingOver(false); };
-      const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDraggingOver(false);
-        processFiles(Array.from(e.dataTransfer.files));
+      // --- Drag & Drop (Global) ---
+      const dragCounter = useRef(0);
+      useEffect(() => {
+        const handleDragEnter = (e) => { e.preventDefault(); dragCounter.current++; if (dragCounter.current === 1) setIsDraggingOver(true); };
+        const handleDragLeave = (e) => { e.preventDefault(); dragCounter.current--; if (dragCounter.current === 0) setIsDraggingOver(false); };
+        const handleDragOver = (e) => { e.preventDefault(); };
+        const handleDrop = (e) => {
+          e.preventDefault();
+          dragCounter.current = 0;
+          setIsDraggingOver(false);
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) processFiles(Array.from(e.dataTransfer.files));
+        };
+
+        window.addEventListener('dragenter', handleDragEnter);
+        window.addEventListener('dragleave', handleDragLeave);
+        window.addEventListener('dragover', handleDragOver);
+        window.addEventListener('drop', handleDrop);
+        return () => {
+          window.removeEventListener('dragenter', handleDragEnter);
+          window.removeEventListener('dragleave', handleDragLeave);
+          window.removeEventListener('dragover', handleDragOver);
+          window.removeEventListener('drop', handleDrop);
+        };
+      }, [processFiles]);
+
+      // --- Utilities ---
+      const renumberMarkers = () => {
+        if (!confirm('全ての問題番号をQ1から順に振り直しますか？\n(ページの順序、上から下の順序でラベル更新されます)')) return;
+        setMarkers(prev => {
+          const sorted = [...prev].sort((a, b) => {
+            const pA = pages.findIndex(p => p.id === a.pageId);
+            const pB = pages.findIndex(p => p.id === b.pageId);
+            if (pA !== pB) return pA - pB;
+            if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
+            return a.x - b.x;
+          });
+          return sorted.map((m, i) => ({ ...m, label: `Q${i + 1}` }));
+        });
       };
 
       useEffect(() => {
@@ -950,7 +982,7 @@
 
       // --- RENDER: EDITOR / PRACTICE MODE ---
       return (
-        <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+        <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans">
           {isLoading && <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center text-white"><div className="text-xl font-bold animate-pulse">処理中...</div></div>}
           {isDraggingOver && <div className="fixed inset-0 bg-blue-500/90 z-50 flex items-center justify-center text-white backdrop-blur-sm"><div className="text-center p-8 border-4 border-dashed border-white/50 rounded-xl"><Upload size={64} className="mx-auto mb-4" /><h2 className="text-3xl font-bold">ファイルをドロップ</h2><p className="mt-2 text-blue-100">画像・音声を追加</p></div></div>}
 
@@ -1037,7 +1069,10 @@
                       ) : <div className="text-xs text-gray-500 italic p-2 border border-dashed rounded text-center">画像を追加してください</div>}
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-800 mb-2 border-b pb-1 text-sm">マーカー設定</h3>
+                      <div className="flex justify-between items-center border-b pb-1 mb-2">
+                        <h3 className="font-bold text-gray-800 text-sm">マーカー設定</h3>
+                        <button onClick={renumberMarkers} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-0.5 rounded border border-gray-300 transition">連番リネーム</button>
+                      </div>
                       {pages.length === 0 ? <p className="text-xs text-gray-400">まずページを追加</p> : selectedMarkerId ? (
                         (() => {
                           const m = markers.find(mark => mark.id === selectedMarkerId);
