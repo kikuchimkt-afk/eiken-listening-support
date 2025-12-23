@@ -640,17 +640,91 @@
         if (selectedMarkerId === id) setSelectedMarkerId(null);
       };
 
+      const audioCache = useRef({});
+      const pendingPlayMarker = useRef(null);
+
+      // Heuristic to map Marker Label to Audio Part
+      const getAudioInfoForMarker = (marker) => {
+        if (!marker || !marker.label) return null;
+        const match = marker.label.match(/(\d+)/);
+        if (!match) return null;
+        const num = parseInt(match[1], 10);
+
+        // Eiken Level 4 Rule
+        if (num >= 1 && num <= 10) return SERVER_ASSETS.audio[0]; // Part 1
+        if (num >= 11 && num <= 20) return SERVER_ASSETS.audio[1]; // Part 2
+        if (num >= 21 && num <= 30) return SERVER_ASSETS.audio[2]; // Part 3
+
+        return SERVER_ASSETS.audio[0]; // Default to Part 1
+      };
+
+      const loadAudioToCache = async (url) => {
+        if (audioCache.current[url]) return audioCache.current[url];
+
+        setIsLoading(true);
+        try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          audioCache.current[url] = blobUrl;
+          return blobUrl;
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
       // --- Audio Ops ---
-      const playSegment = (marker) => {
+      const playSegment = async (marker) => {
         if (!audioRef.current) return;
+
+        // 1. Page Navigation
         const targetPageIndex = pages.findIndex(p => p.id === marker.pageId);
         if (targetPageIndex !== -1 && targetPageIndex !== currentPageIndex) setCurrentPageIndex(targetPageIndex);
-        audioRef.current.playbackRate = playbackRate;
-        audioRef.current.pause();
-        audioRef.current.currentTime = marker.startTime;
-        setCurrentMarkerId(marker.id);
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
+
+        // 2. Determine required audio
+        const audioInfo = getAudioInfoForMarker(marker);
+        let targetBlobUrl = audioSrc;
+        let targetName = audioFileName;
+
+        if (audioInfo) {
+          // Ensure it is loaded
+          if (!audioCache.current[audioInfo.url]) {
+            targetBlobUrl = await loadAudioToCache(audioInfo.url);
+          } else {
+            targetBlobUrl = audioCache.current[audioInfo.url];
+          }
+          targetName = audioInfo.name;
+        }
+
+        // 3. Switch Audio if needed
+        if (targetBlobUrl !== audioSrc) {
+          setAudioSrc(targetBlobUrl);
+          setAudioFileName(targetName);
+          pendingPlayMarker.current = marker; // Queue play
+          // The useEffect below will trigger play when src changes
+        } else {
+          // 4. Just Play
+          audioRef.current.playbackRate = playbackRate;
+          audioRef.current.pause();
+          audioRef.current.currentTime = marker.startTime;
+          setCurrentMarkerId(marker.id);
+          audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
+        }
       };
+
+      // Auto-play after audio switch
+      useEffect(() => {
+        if (pendingPlayMarker.current && audioRef.current && audioSrc) {
+          const marker = pendingPlayMarker.current;
+          pendingPlayMarker.current = null;
+
+          audioRef.current.playbackRate = playbackRate;
+          audioRef.current.currentTime = marker.startTime;
+          setCurrentMarkerId(marker.id);
+          audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
+        }
+      }, [audioSrc]);
+
       const togglePlay = () => {
         if (!audioRef.current) return;
         audioRef.current.playbackRate = playbackRate;
