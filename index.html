@@ -391,11 +391,6 @@
           if (project.audio) {
             setAudioSrc(URL.createObjectURL(project.audio.blob));
             setAudioFileName(project.audio.name);
-          } else if (project.audioConfig && project.audioConfig.tracks && project.audioConfig.tracks.length > 0) {
-            // Auto-load first track from config
-            const t = project.audioConfig.tracks[0];
-            const url = `${project.audioConfig.baseDir}/${t.file}`;
-            await loadServerAudio(url, t.label);
           } else {
             setAudioSrc(null);
             setAudioFileName(null);
@@ -760,6 +755,37 @@
           audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
         }
       }, [audioSrc]);
+
+      // Auto-switch audio on page change
+      useEffect(() => {
+        if (mode !== 'practice' || pages.length === 0) return;
+
+        const currentPage = pages[currentPageIndex];
+        if (!currentPage) return;
+
+        const pageMarkers = markers.filter(m => m.pageId === currentPage.id);
+        if (pageMarkers.length === 0) return;
+
+        // Use first marker to determine page's audio
+        const info = getAudioInfoForMarker(pageMarkers[0]);
+        // Only switch if different AND valid
+        if (info && info.name !== audioFileName) {
+          (async () => {
+            try {
+              const blobUrl = await loadAudioToCache(info.url);
+              setAudioSrc(blobUrl);
+              setAudioFileName(info.name);
+              setIsPlaying(false);
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+              }
+            } catch (e) {
+              console.error("Auto-switch failed", e);
+            }
+          })();
+        }
+      }, [currentPageIndex, mode]);
 
       const togglePlay = () => {
         if (!audioRef.current) return;

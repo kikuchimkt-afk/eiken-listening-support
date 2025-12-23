@@ -29,7 +29,7 @@
                           "file":  "part3.mp3"
                       }
                   ],
-        "title":  "2025 Session 2 Eiken  Grade 4",
+        "title":  "2025 Session 2 Eiken Grade 4",
         "dir":  "assets/level4/2025-2",
         "id":  "level4_2025-2_data",
         "json":  "data.json"
@@ -64,7 +64,7 @@
                           "file":  "3Q-part3.mp3"
                       }
                   ],
-        "title":  "2025 Session 1 Eiken  Grade 3",
+        "title":  "2025 Session 1 Eiken Grade 3",
         "dir":  "assets/level3/2025-1",
         "id":  "level3_2025-1_data",
         "json":  "data.json"

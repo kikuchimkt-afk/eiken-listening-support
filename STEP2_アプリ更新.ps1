@@ -30,18 +30,30 @@ foreach ($file in $projectFiles) {
     try {
         $jsonContent = Get-Content $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
         
-        # Generate Title
-        # assets/level3/2024-1 -> 2024-1 level3
+        # Generate Title (Use English Only to avoid encoding issues completely)
         $parts = $relativeDir -split "/"
         $title = "Project"
+        
         if ($parts.Count -ge 3) {
-            $levelStr = $parts[-2].Replace("level", " Grade ").Replace("pre", "Pre-") 
-            $yearStr = $parts[-1].Replace("-", " Session ")
-            $title = "$yearStr Eiken $levelStr"
+            # level3 -> 3, levelpre2 -> pre2
+            $levelStr = $parts[-2].Replace("level", "")
+            if ($levelStr -eq "pre2") { $levelStr = "Pre-2" }
+           
+            $yearPart = $parts[-1]
+           
+            if ($yearPart -match "(\d{4})-(\d+)") {
+                $y = $matches[1]
+                $s = $matches[2]
+                # "2024 Session 1 Eiken Grade 3"
+                $title = "{0} Session {1} Eiken Grade {2}" -f $y, $s, $levelStr
+            }
+            else {
+                $title = "{0} Eiken Grade {1}" -f $yearPart, $levelStr
+            }
         }
     }
     catch {
-        Write-Host "Skip: $($file.Name) (Invalid Format)"
+        Write-Host "Skip: $($file.Name)"
         continue
     }
 
@@ -55,7 +67,7 @@ foreach ($file in $projectFiles) {
         $rangeStart = 1
         $rangeEnd = 100
 
-        # Parse part from filename
+        # Parse part from filename (simple regex)
         if ($name -match "part(\d+)") {
             $partNum = [int]$matches[1]
             $rangeStart = ($partNum - 1) * 10 + 1
@@ -83,7 +95,7 @@ foreach ($file in $projectFiles) {
         audio = $audioConfig
     }
     
-    Write-Host "  OK: $title" -ForegroundColor Cyan
+    Write-Host "Target: $title" -ForegroundColor Cyan
 }
 
 # Save JSON
@@ -91,6 +103,6 @@ $jsonOutput = $catalog | ConvertTo-Json -Depth 4
 Set-Content -Path $outputFile -Value $jsonOutput -Encoding UTF8
 
 Write-Host ""
-Write-Host "Success! Total Projects: $($catalog.Count)" -ForegroundColor Green
+Write-Host "Success! Total: $($catalog.Count)" -ForegroundColor Green
 Write-Host "Press Enter to exit..."
 $null = Read-Host
