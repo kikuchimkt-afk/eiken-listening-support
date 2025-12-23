@@ -188,13 +188,15 @@
     const App = () => {
       // --- State Management ---
       const [isStudentMode] = useState(() => new URLSearchParams(window.location.search).has('student'));
-      const [mode, setMode] = useState(isStudentMode ? 'library' : 'library'); // 'library', 'edit', 'practice'
+      const [mode, setMode] = useState(isStudentMode ? 'library' : 'library');
       const [isLoading, setIsLoading] = useState(false);
-      const [projectList, setProjectList] = useState([]);
+      const [localProjects, setLocalProjects] = useState([]);
+      const [remoteProjects, setRemoteProjects] = useState([]);
 
       // Current Project Metadata
-      const [projectId, setProjectId] = useState(null); // DB ID if saved
+      const [projectId, setProjectId] = useState(null);
       const [projectTitle, setProjectTitle] = useState("無題のプロジェクト");
+      const [currentAudioConfig, setCurrentAudioConfig] = useState(null);
 
       // Pages & Audio
       const [pages, setPages] = useState([]);
@@ -221,34 +223,40 @@
 
       const audioRef = useRef(null);
       const imageContainerRef = useRef(null);
+      const audioCache = useRef({});
+      const pendingPlayMarker = useRef(null);
 
       // --- Initial Load (Library) ---
       useEffect(() => {
         if (mode === 'library') {
           refreshLibrary();
+          fetchRemoteCatalog();
         }
       }, [mode]);
 
-      // ... (Keep loadDefaultProject and refreshLibrary as is) ...
-      const loadDefaultProject = async (force = false) => {
+      const fetchRemoteCatalog = async () => {
         try {
-          // If not forced, check if DB is empty first
-          if (!force) {
-            const list = await getAllProjectsMeta();
-            if (list.length > 0) return;
+          const res = await fetch('./projects_catalog.json');
+          if (res.ok) {
+            const data = await res.json();
+            setRemoteProjects(data);
           }
+        } catch (e) { console.error("Catalog load failed", e); }
+      };
 
-          setIsLoading(true);
-          const res = await fetch(SERVER_ASSETS.json);
-          if (!res.ok) throw new Error(`Default data not found (${res.status})`);
+      const importRemoteProject = async (pMeta) => {
+        setIsLoading(true);
+        try {
+          // Build URL
+          const jsonUrl = pMeta.dir ? `${pMeta.dir}/${pMeta.json}` : pMeta.json;
+
+          const res = await fetch(jsonUrl);
+          if (!res.ok) throw new Error(`Data not found (${res.status})`);
 
           const data = await res.json();
 
-          // Check if this project ID already exists to avoid duplicates when forcing
-          const targetId = "default_level4_2025_2";
-          if (force) {
-            try { await deleteProjectFromDB(targetId); } catch (e) { }
-          }
+          // Check/Delete existing
+          try { await deleteProjectFromDB(pMeta.id); } catch (e) { }
 
           const pagesForDB = data.pages ? await Promise.all(data.pages.map(async (p) => {
             const r = await fetch(p.src);
@@ -257,39 +265,57 @@
           })) : [];
 
           const projectData = {
-            id: targetId,
-            title: SERVER_ASSETS.projectTitle,
+            id: pMeta.id,
+            title: pMeta.title,
             updatedAt: new Date().toISOString(),
             markers: data.markers || [],
             pages: pagesForDB,
-            audio: null
+            audio: null,
+            audioConfig: {
+              baseDir: pMeta.dir,
+              tracks: pMeta.audio
+            }
           };
 
           await saveProjectToDB(projectData);
           await refreshLibrary();
-          if (force) alert("デフォルト教材を読み込みました。");
+
+          handleOpenProject(pMeta.id);
+          if (isStudentMode) alert("教材を読み込みました。");
         } catch (err) {
-          console.error("Default assets load failed", err);
-          if (force) alert("デフォルトデータの読み込みに失敗しました。\n\n【注意】\nローカルフォルダから直接(file://)開いている場合は、ブラウザのセキュリティ制限により外部ファイルを読み込めないことがあります。\nVercel等のサーバーにアップロードして確認するか、ローカルサーバー経由で開いてください。\n\n詳細: " + err.message);
+          console.error("Project load failed", err);
+          alert("読み込みに失敗しました。\n" + err.message);
         } finally {
-          if (force) setIsLoading(false);
+          setIsLoading(false);
         }
       };
 
       const refreshLibrary = async () => {
         setIsLoading(true);
         try {
-          // Try auto-load first (silent)
-          await loadDefaultProject(false);
-
           const list = await getAllProjectsMeta();
-          setProjectList(list);
-        } catch (e) {
-          console.error("Failed to load library", e);
-        } finally {
-          setIsLoading(false);
-        }
+          setLocalProjects(list);
+        } catch (e) { console.error(e); }
+        finally { setIsLoading(false); }
       };
+
+      // Merge Local and Remote Projects
+      const projectList = React.useMemo(() => {
+        const locals = localProjects.map(p => ({ ...p, isLocal: true }));
+        const remotes = remoteProjects
+          .filter(r => !localProjects.find(l => l.id === r.id))
+          .map(r => ({
+            ...r,
+            isRemote: true,
+            isLocal: false,
+            updatedAt: new Date().toISOString(),
+            pagesCount: '-',
+            hasAudio: r.audio && r.audio.length > 0
+          }));
+        return [...locals, ...remotes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      }, [localProjects, remoteProjects]);
+
+
 
       // --- Helper: Blob/Url Handling ---
       const blobUrlToBlob = async (blobUrl) => {
@@ -355,19 +381,26 @@
             src: URL.createObjectURL(p.blob)
           }));
 
+          setProjectId(project.id);
+          setProjectTitle(project.title);
+          setPages(restoredPages);
+          setMarkers(project.markers);
+          setCurrentAudioConfig(project.audioConfig || null); // Restore Config
+
           // Restore Audio
           if (project.audio) {
             setAudioSrc(URL.createObjectURL(project.audio.blob));
             setAudioFileName(project.audio.name);
+          } else if (project.audioConfig && project.audioConfig.tracks && project.audioConfig.tracks.length > 0) {
+            // Auto-load first track from config
+            const t = project.audioConfig.tracks[0];
+            const url = `${project.audioConfig.baseDir}/${t.file}`;
+            await loadServerAudio(url, t.label);
           } else {
             setAudioSrc(null);
             setAudioFileName(null);
           }
 
-          setProjectId(project.id);
-          setProjectTitle(project.title);
-          setPages(restoredPages);
-          setMarkers(project.markers);
           setCurrentPageIndex(0);
           setMode('practice');
         } catch (e) {
@@ -640,22 +673,25 @@
         if (selectedMarkerId === id) setSelectedMarkerId(null);
       };
 
-      const audioCache = useRef({});
-      const pendingPlayMarker = useRef(null);
+
 
       // Heuristic to map Marker Label to Audio Part
+      // Heuristic to map Marker Label to Audio Part
       const getAudioInfoForMarker = (marker) => {
-        if (!marker || !marker.label) return null;
+        if (!marker || !marker.label || !currentAudioConfig) return null;
+
         const match = marker.label.match(/(\d+)/);
         if (!match) return null;
         const num = parseInt(match[1], 10);
 
-        // Eiken Level 4 Rule
-        if (num >= 1 && num <= 10) return SERVER_ASSETS.audio[0]; // Part 1
-        if (num >= 11 && num <= 20) return SERVER_ASSETS.audio[1]; // Part 2
-        if (num >= 21 && num <= 30) return SERVER_ASSETS.audio[2]; // Part 3
+        // Find track that covers this number
+        const track = currentAudioConfig.tracks.find(t => num >= t.range[0] && num <= t.range[1]);
+        if (!track) return null;
 
-        return SERVER_ASSETS.audio[0]; // Default to Part 1
+        return {
+          url: `${currentAudioConfig.baseDir}/${track.file}`,
+          name: track.label
+        };
       };
 
       const loadAudioToCache = async (url) => {
@@ -826,8 +862,8 @@
                 <div className="bg-green-50 border border-green-200 p-6 rounded-xl text-green-800">
                   <h3 className="font-bold flex items-center gap-2"><CheckCircle size={20} /> 学習を開始しましょう</h3>
                   <p className="text-sm mt-1 mb-4">以下のリストからプロジェクトを選んでください。</p>
-                  <button onClick={() => loadDefaultProject(true)} className="text-xs bg-white hover:bg-green-100 text-green-700 px-3 py-1.5 rounded transition border border-green-300">
-                    ↻ デフォルト問題を再ロード
+                  <button onClick={() => fetchRemoteCatalog()} className="text-xs bg-white hover:bg-green-100 text-green-700 px-3 py-1.5 rounded transition border border-green-300">
+                    ↻ カタログ更新
                   </button>
                 </div>
               )}
@@ -843,7 +879,7 @@
                 ) : projectList.length > 0 ? (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y">
                     {projectList.map(project => (
-                      <div key={project.id} onClick={() => handleOpenProject(project.id)}
+                      <div key={project.id} onClick={() => project.isLocal ? handleOpenProject(project.id) : importRemoteProject(project)}
                         className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition group">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
@@ -1034,14 +1070,24 @@
                       <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] sm:max-w-xs leading-tight" title={audioFileName}>{audioFileName || "No Audio"}</span>
                       <select
                         onChange={(e) => {
-                          const opt = SERVER_ASSETS.audio.find(a => a.url === e.target.value);
-                          if (opt) loadServerAudio(opt.url, opt.name);
+                          const val = e.target.value;
+                          if (!val) return;
+                          if (currentAudioConfig) {
+                            const track = currentAudioConfig.tracks.find(t => `${currentAudioConfig.baseDir}/${t.file}` === val);
+                            if (track) loadServerAudio(val, track.label);
+                          } else if (typeof SERVER_ASSETS !== 'undefined') {
+                            const opt = SERVER_ASSETS.audio.find(a => a.url === val);
+                            if (opt) loadServerAudio(opt.url, opt.name);
+                          }
                           e.target.value = "";
                         }}
                         className="text-xs border rounded bg-gray-50 max-w-[80px] opacity-70 hover:opacity-100 transition"
                       >
                         <option value="">Load...</option>
-                        {SERVER_ASSETS.audio.map(a => <option key={a.url} value={a.url}>{a.name}</option>)}
+                        {typeof SERVER_ASSETS !== 'undefined' && SERVER_ASSETS.audio.map(a => <option key={a.url} value={a.url}>{a.name}</option>)}
+                        {currentAudioConfig && currentAudioConfig.tracks.map(t => (
+                          <option key={t.file} value={`${currentAudioConfig.baseDir}/${t.file}`}>{t.label}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
