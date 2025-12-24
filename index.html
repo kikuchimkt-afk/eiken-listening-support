@@ -68,17 +68,30 @@
       }
 
       #printable-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0;
+        position: relative;
+        /* absoluteから変更して中央寄せしやすくする */
+        width: 210mm !important;
+        /* A4幅固定 */
+        min-height: 297mm !important;
+        margin: 0 auto !important;
+        /* 左右中央配置 */
+        padding: 20mm !important;
+        /* 基本パディング */
+
+        /* ユーザー等の要望による90%縮小 & 中央配置調整 */
+        transform: scale(0.9);
+        transform-origin: top center;
+        top: 10mm;
+        /* 上部に余白を追加 (縮小レイアウトのバランス調整) */
+
+        box-shadow: none !important;
+        background-color: white !important;
       }
 
       @page {
-        size: A4;
-        margin: 0mm;
+        size: A4 portrait;
+        margin: 0;
+        /* ブラウザのヘッダー/フッター余白を排除 */
       }
     }
   </style>
