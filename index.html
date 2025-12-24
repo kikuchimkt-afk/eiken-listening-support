@@ -954,9 +954,9 @@
                                 .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
                             </h3>
                             <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                              <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} pages</span>
-                              <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? 'Audio OK' : 'No Audio'}</span>
-                              <span>Updated: {new Date(project.updatedAt).toLocaleString()}</span>
+                              <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} ページ</span>
+                              <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? '音声あり' : '音声なし'}</span>
+                              <span>更新: {new Date(project.updatedAt).toLocaleString()}</span>
                             </div>
                           </div>
                         </div>
@@ -1142,7 +1142,7 @@
                   <div className="flex flex-col justify-center h-10 border-l pl-4 ml-2">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">Audio</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] sm:max-w-xs leading-tight" title={audioFileName}>{audioFileName || "No Audio"}</span>
+                      <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] sm:max-w-xs leading-tight" title={audioFileName}>{audioFileName || "音声未選択"}</span>
                       <select
                         onChange={(e) => {
                           const val = e.target.value;
