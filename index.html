@@ -15,6 +15,7 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     /* Custom Scrollbar for better UI */
@@ -48,6 +49,32 @@
 
     .animate-fadeIn {
       animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Print Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #printable-area,
+      #printable-area * {
+        visibility: visible;
+      }
+
+      #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      @page {
+        size: A4;
+        margin: 20mm;
+      }
     }
   </style>
 </head>
@@ -89,14 +116,15 @@
       Clock: (p) => <IconWrapper {...p}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></IconWrapper>,
       ArrowLeft: (p) => <IconWrapper {...p}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></IconWrapper>,
       Scissors: (p) => <IconWrapper {...p}><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></IconWrapper>,
-      FolderOpen: (p) => <IconWrapper {...p}><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-3.25 7a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v2"></path></IconWrapper>
+      FolderOpen: (p) => <IconWrapper {...p}><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-3.25 7a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v2"></path></IconWrapper>,
+      Printer: (p) => <IconWrapper {...p}><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></IconWrapper>
     };
 
     const {
       Play, Pause, Upload, Trash2, Volume2, PlusCircle, CheckCircle,
       ChevronLeft, ChevronRight, FileText, Layers, X,
       Maximize2, RotateCcw, RotateCw, Download, Save, Gauge,
-      Home, Database, Clock, ArrowLeft, Scissors, FolderOpen
+      Home, Database, Clock, ArrowLeft, Scissors, FolderOpen, Printer
     } = Icons;
 
     // --- Server Assets Configuration ---
@@ -183,6 +211,96 @@
       });
     };
 
+    // --- Printable Sheet Component ---
+    const PrintableSheet = ({ title, instructor, deadline, comment, url, onClose }) => {
+      const qrRef = useRef(null);
+
+      useEffect(() => {
+        if (qrRef.current) {
+          qrRef.current.innerHTML = "";
+          try {
+            new QRCode(qrRef.current, { text: url, width: 128, height: 128 });
+          } catch (e) {
+            console.error("QRCode Error", e);
+            qrRef.current.innerHTML = "QR Error";
+          }
+        }
+      }, [url]);
+
+      return (
+        <div className="fixed inset-0 bg-white z-[200] overflow-auto flex flex-col">
+          {/* Print Toolbar - Hidden when printing */}
+          <div className="bg-gray-800 text-white p-4 flex justify-between items-center print:hidden shrink-0">
+            <h2 className="font-bold flex items-center gap-2"><Printer /> プレビュー</h2>
+            <div className="flex gap-4">
+              <button onClick={onClose} className="px-4 py-2 hover:bg-gray-700 rounded">キャンセル</button>
+              <button onClick={() => window.print()} className="bg-blue-600 px-6 py-2 rounded font-bold hover:bg-blue-700 flex items-center gap-2">
+                <Printer size={20} /> 印刷
+              </button>
+            </div>
+          </div>
+
+          {/* A4 Sheet */}
+          <div className="flex-1 bg-gray-100 p-8 overflow-auto print:bg-white print:p-0 print:overflow-visible">
+            <div id="printable-area" className="mx-auto bg-white shadow-xl print:shadow-none p-[20mm] w-[210mm] min-h-[297mm] text-gray-900 font-serif leading-relaxed relative">
+              <h1 className="text-3xl font-bold border-b-4 border-gray-800 pb-4 mb-8 text-center tracking-wider">Listening Assignment</h1>
+
+              <div className="flex justify-between items-start mb-10">
+                <div className="flex-1 pr-8">
+                  <h2 className="text-2xl font-bold mb-6 break-words">{title}</h2>
+                  <div className="space-y-3 text-sm">
+                    <p className="flex items-center gap-2"><span className="w-20 font-bold text-gray-500 uppercase tracking-widest text-xs">Date</span> <span>{new Date().toLocaleDateString()}</span></p>
+                    <p className="flex items-center gap-2"><span className="w-20 font-bold text-gray-500 uppercase tracking-widest text-xs">Deadline</span> <span className="text-xl font-bold underline decoration-2 decoration-red-200">{deadline || "_______/_______"}</span></p>
+                    <p className="flex items-center gap-2"><span className="w-20 font-bold text-gray-500 uppercase tracking-widest text-xs">Instructor</span> <span>{instructor || "_________________"}</span></p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center shrink-0">
+                  <div className="bg-white p-2 border-2 border-gray-800 rounded-lg">
+                    <div ref={qrRef} className="w-[128px] h-[128px]"></div>
+                  </div>
+                  <p className="mt-2 text-[10px] font-sans text-gray-500 text-center uppercase tracking-widest">Scan to Start</p>
+                </div>
+              </div>
+
+              <div className="mb-10">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 mb-3">Target / Comment</h3>
+                <div className="border border-gray-200 rounded-lg p-6 min-h-[120px] bg-gray-50/50 print:bg-transparent">
+                  <p className="whitespace-pre-wrap text-lg">{comment}</p>
+                </div>
+              </div>
+
+              <div className="mb-10">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 mb-3">Result</h3>
+                <div className="border-2 border-gray-800 rounded-xl p-8 flex items-center justify-around">
+                  <div className="text-center w-1/3">
+                    <p className="text-sm text-gray-500 mb-2 font-sans">Date</p>
+                    <div className="border-b-2 border-gray-300 w-full h-8"></div>
+                  </div>
+                  <div className="h-16 w-px bg-gray-200"></div>
+                  <div className="text-center w-1/3">
+                    <p className="text-sm text-gray-500 mb-2 font-sans">Score</p>
+                    <div className="flex items-end justify-center">
+                      <div className="border-b-2 border-gray-800 w-20 text-center h-10"></div>
+                      <span className="text-2xl font-bold ml-2">/ pts</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 mb-3">Memo</h3>
+                <div className="w-full h-full border border-gray-200 rounded-lg min-h-[200px]"></div>
+              </div>
+
+              <div className="absolute bottom-4 right-8 text-[10px] text-gray-300 font-sans">
+                Powered by Eiken Listening Support App
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // --- Main App Component ---
 
     const App = () => {
@@ -213,6 +331,10 @@
         type: null, markerId: null, startX: 0, startY: 0, initialData: null
       });
       const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+      // Print State
+      const [showHomeworkModal, setShowHomeworkModal] = useState(false);
+      const [printConfig, setPrintConfig] = useState({ instructor: '', deadline: '', comment: '' });
 
       // Audio Playback
       const [isPlaying, setIsPlaying] = useState(false);
@@ -916,6 +1038,9 @@
                     }} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
                       リンクをコピー
                     </button>
+                    <button onClick={() => setShowHomeworkModal(true)} className="w-full mt-2 bg-white text-gray-700 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2 text-sm">
+                      <Printer size={16} /> 課題プリント作成
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -983,9 +1108,48 @@
         );
       }
 
+      if (mode === 'print') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('student', 'true');
+        return <PrintableSheet
+          title={projectTitle}
+          instructor={printConfig.instructor}
+          deadline={printConfig.deadline}
+          comment={printConfig.comment}
+          url={url.toString()}
+          onClose={() => setMode('library')}
+        />;
+      }
+
       // --- RENDER: EDITOR / PRACTICE MODE ---
       return (
         <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans">
+          {showHomeworkModal && (
+            <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4 animate-fadeIn">
+                <h2 className="text-xl font-bold flex items-center gap-2"><Printer /> 課題プリント作成</h2>
+                <p className="text-sm text-gray-500">生徒配布用のプリントを作成します。必要な情報を入力してください。</p>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">講師名</label>
+                  <input type="text" className="w-full border rounded p-2" placeholder="例: 山田先生" value={printConfig.instructor} onChange={e => setPrintConfig({ ...printConfig, instructor: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">提出期限</label>
+                  <input type="text" className="w-full border rounded p-2" placeholder="例: 来週の月曜日まで" value={printConfig.deadline} onChange={e => setPrintConfig({ ...printConfig, deadline: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">コメント / 学習のねらい</label>
+                  <textarea className="w-full border rounded p-2 h-24" placeholder="例: Part 1のNo.1-5を重点的に復習しましょう。" value={printConfig.comment} onChange={e => setPrintConfig({ ...printConfig, comment: e.target.value })}></textarea>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <button onClick={() => setShowHomeworkModal(false)} className="px-4 py-2 hover:bg-gray-100 rounded">キャンセル</button>
+                  <button onClick={() => { setShowHomeworkModal(false); setMode('print'); }} className="px-4 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700">プレビューを表示</button>
+                </div>
+              </div>
+            </div>
+          )}
           {isLoading && <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center text-white"><div className="text-xl font-bold animate-pulse">処理中...</div></div>}
           {isDraggingOver && <div className="fixed inset-0 bg-blue-500/90 z-50 flex items-center justify-center text-white backdrop-blur-sm"><div className="text-center p-8 border-4 border-dashed border-white/50 rounded-xl"><Upload size={64} className="mx-auto mb-4" /><h2 className="text-3xl font-bold">ファイルをドロップ</h2><p className="mt-2 text-blue-100">画像・音声を追加</p></div></div>}
 
