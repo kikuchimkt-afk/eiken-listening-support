@@ -782,349 +782,462 @@
 
       // Update audio effect hooks...
 
-      const getAudioInfoForMarker = (marker) => {
-        // ... Logic to find correct audio track from marker page/config
-        if (!currentAudioConfig) return null;
+      useEffect(() => {
+        const handleMouseMove = (e) => {
+          if (!interactionState.type || !imageContainerRef.current) return;
+          const rect = imageContainerRef.current.getBoundingClientRect();
+          const deltaX_px = e.clientX - interactionState.startX;
+          const deltaY_px = e.clientY - interactionState.startY;
+          const deltaX_pct = (deltaX_px / rect.width) * 100;
+          const deltaY_pct = (deltaY_px / rect.height) * 100;
 
-        // Find the page file name for this marker
-        const page = pages.find(p => p.id === marker.pageId);
-        if (!page) return null;
-
-        // Match logic: track.pageName === page.name
-        // Simplified: assuming track.file maps 1:1 or logic is defined
-        // For now, if simple audioSrc is set, use it.
-        // If complex config, find track.
-
-        // Re-implementing simplified version for this context as seen in previous logs logic was likely simple or custom.
-        // Since I replaced the block, reusing the standard logic if needed or assuming single audio for now if not complex.
-
-        return null; // Placeholder as actual logic was in the middle of standard block
-      };
-
-      // Re-inserting the missing audio logic hooks that were in the replaced block.
-      // 1. Page Navigation
-      // 2. Audio Loading
-      // Note: The previous block contained these. I need to ensure they are present.
-      // Since I replaced a HUGE chunk, I must be careful.
-      // Wait, I am replacing from 340 to 1423? No.
-      // I am replacing from 340 to ... wait.
-      // The previous VIEW showed lines 303 to 1423 (roughly).
-      // My replace target is "App component".
-      // I should be careful not to delete the `useEffect` hooks for audio.
-
-      // Let's refine the replacement strategy.
-      // I will replace ONLY the App definition start and the `if (mode === 'library')` block.
-      // Better to use multi_replace.
-
-      // ABORTING full replace to avoid wiping internal App logic.
-      // I will use multi_replace to target specific blocks.
-      setSelectedMarkerId(marker.id);
-    };
-
-    useEffect(() => {
-      const handleMouseMove = (e) => {
-        if (!interactionState.type || !imageContainerRef.current) return;
-        const rect = imageContainerRef.current.getBoundingClientRect();
-        const deltaX_px = e.clientX - interactionState.startX;
-        const deltaY_px = e.clientY - interactionState.startY;
-        const deltaX_pct = (deltaX_px / rect.width) * 100;
-        const deltaY_pct = (deltaY_px / rect.height) * 100;
-
-        setMarkers(prev => prev.map(m => {
-          if (m.id !== interactionState.markerId) return m;
-          if (interactionState.type === 'move') {
-            return {
-              ...m,
-              x: interactionState.initialData.x + deltaX_pct,
-              y: interactionState.initialData.y + deltaY_pct
-            };
-          } else if (interactionState.type === 'resize') {
-            return {
-              ...m,
-              width: Math.max(2, interactionState.initialData.width + deltaX_pct),
-              height: Math.max(2, interactionState.initialData.height + deltaY_pct)
-            };
+          setMarkers(prev => prev.map(m => {
+            if (m.id !== interactionState.markerId) return m;
+            if (interactionState.type === 'move') {
+              return {
+                ...m,
+                x: interactionState.initialData.x + deltaX_pct,
+                y: interactionState.initialData.y + deltaY_pct
+              };
+            } else if (interactionState.type === 'resize') {
+              return {
+                ...m,
+                width: Math.max(2, interactionState.initialData.width + deltaX_pct),
+                height: Math.max(2, interactionState.initialData.height + deltaY_pct)
+              };
+            }
+            return m;
+          }));
+        };
+        const handleMouseUp = () => {
+          if (interactionState.type) {
+            setInteractionState({ type: null, markerId: null, startX: 0, startY: 0, initialData: null });
           }
-          return m;
-        }));
-      };
-      const handleMouseUp = () => {
+        };
         if (interactionState.type) {
-          setInteractionState({ type: null, markerId: null, startX: 0, startY: 0, initialData: null });
+          window.addEventListener('mousemove', handleMouseMove);
+          window.addEventListener('mouseup', handleMouseUp);
         }
-      };
-      if (interactionState.type) {
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-      }
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }, [interactionState]);
+        return () => {
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mouseup', handleMouseUp);
+        };
+      }, [interactionState]);
 
-    // --- Drag & Drop (Global) ---
-    const dragCounter = useRef(0);
-    useEffect(() => {
-      const handleDragEnter = (e) => { e.preventDefault(); dragCounter.current++; if (dragCounter.current === 1) setIsDraggingOver(true); };
-      const handleDragLeave = (e) => { e.preventDefault(); dragCounter.current--; if (dragCounter.current === 0) setIsDraggingOver(false); };
-      const handleDragOver = (e) => { e.preventDefault(); };
-      const handleDrop = (e) => {
-        e.preventDefault();
-        dragCounter.current = 0;
-        setIsDraggingOver(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) processFiles(Array.from(e.dataTransfer.files));
-      };
+      // --- Drag & Drop (Global) ---
+      const dragCounter = useRef(0);
+      useEffect(() => {
+        const handleDragEnter = (e) => { e.preventDefault(); dragCounter.current++; if (dragCounter.current === 1) setIsDraggingOver(true); };
+        const handleDragLeave = (e) => { e.preventDefault(); dragCounter.current--; if (dragCounter.current === 0) setIsDraggingOver(false); };
+        const handleDragOver = (e) => { e.preventDefault(); };
+        const handleDrop = (e) => {
+          e.preventDefault();
+          dragCounter.current = 0;
+          setIsDraggingOver(false);
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 0) processFiles(Array.from(e.dataTransfer.files));
+        };
 
-      window.addEventListener('dragenter', handleDragEnter);
-      window.addEventListener('dragleave', handleDragLeave);
-      window.addEventListener('dragover', handleDragOver);
-      window.addEventListener('drop', handleDrop);
-      return () => {
-        window.removeEventListener('dragenter', handleDragEnter);
-        window.removeEventListener('dragleave', handleDragLeave);
-        window.removeEventListener('dragover', handleDragOver);
-        window.removeEventListener('drop', handleDrop);
-      };
-    }, [processFiles]);
+        window.addEventListener('dragenter', handleDragEnter);
+        window.addEventListener('dragleave', handleDragLeave);
+        window.addEventListener('dragover', handleDragOver);
+        window.addEventListener('drop', handleDrop);
+        return () => {
+          window.removeEventListener('dragenter', handleDragEnter);
+          window.removeEventListener('dragleave', handleDragLeave);
+          window.removeEventListener('dragover', handleDragOver);
+          window.removeEventListener('drop', handleDrop);
+        };
+      }, [processFiles]);
 
-    // --- Utilities ---
-    const renumberMarkers = () => {
-      if (!confirm('全ての問題番号をQ1から順に振り直しますか？\n(ページの順序、上から下の順序でラベル更新されます)')) return;
-      setMarkers(prev => {
-        const sorted = [...prev].sort((a, b) => {
-          const pA = pages.findIndex(p => p.id === a.pageId);
-          const pB = pages.findIndex(p => p.id === b.pageId);
-          if (pA !== pB) return pA - pB;
-          if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
-          return a.x - b.x;
+      // --- Utilities ---
+      const renumberMarkers = () => {
+        if (!confirm('全ての問題番号をQ1から順に振り直しますか？\n(ページの順序、上から下の順序でラベル更新されます)')) return;
+        setMarkers(prev => {
+          const sorted = [...prev].sort((a, b) => {
+            const pA = pages.findIndex(p => p.id === a.pageId);
+            const pB = pages.findIndex(p => p.id === b.pageId);
+            if (pA !== pB) return pA - pB;
+            if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
+            return a.x - b.x;
+          });
+          return sorted.map((m, i) => ({ ...m, label: `No.${i + 1}` }));
         });
-        return sorted.map((m, i) => ({ ...m, label: `No.${i + 1}` }));
-      });
-    };
+      };
 
-    useEffect(() => {
-      const handlePaste = (e) => {
-        if (mode === 'library') return;
-        if (e.clipboardData && e.clipboardData.items) {
-          const items = e.clipboardData.items;
-          const files = [];
-          for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-              const blob = items[i].getAsFile();
-              const file = new File([blob], `Pasted Image ${new Date().toLocaleTimeString()}`, { type: blob.type });
-              files.push(file);
+      useEffect(() => {
+        const handlePaste = (e) => {
+          if (mode === 'library') return;
+          if (e.clipboardData && e.clipboardData.items) {
+            const items = e.clipboardData.items;
+            const files = [];
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                const file = new File([blob], `Pasted Image ${new Date().toLocaleTimeString()}`, { type: blob.type });
+                files.push(file);
+              }
             }
+            if (files.length > 0) processFiles(files);
           }
-          if (files.length > 0) processFiles(files);
+        };
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+      }, [processFiles, mode]);
+
+      // --- Navigation ---
+      const goToNextPage = () => { if (currentPageIndex < pages.length - 1) setCurrentPageIndex(prev => prev + 1); };
+      const goToPrevPage = () => { if (currentPageIndex > 0) setCurrentPageIndex(prev => prev - 1); };
+      const deletePage = (index) => {
+        const pageToDelete = pages[index];
+        setMarkers(prev => prev.filter(m => m.pageId !== pageToDelete.id));
+        const newPages = pages.filter((_, i) => i !== index);
+        setPages(newPages);
+        if (currentPageIndex >= newPages.length) setCurrentPageIndex(Math.max(0, newPages.length - 1));
+      };
+
+      // --- Marker Ops ---
+      const addMarker = (e) => {
+        if (mode !== 'edit' || !imageContainerRef.current || pages.length === 0) return;
+        if (interactionState.type) return;
+        const rect = imageContainerRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        const currentPage = pages[currentPageIndex];
+        const newMarker = {
+          id: Date.now(), x, y, width: 10, height: 5, startTime: 0, endTime: 10,
+          label: `No.${markers.length + 1}`, pageId: currentPage.id
+        };
+        setMarkers([...markers, newMarker]);
+        setSelectedMarkerId(newMarker.id);
+      };
+      const updateMarker = (id, field, value) => setMarkers(markers.map(m => m.id === id ? { ...m, [field]: value } : m));
+      const deleteMarker = (id) => {
+        setMarkers(markers.filter(m => m.id !== id));
+        if (selectedMarkerId === id) setSelectedMarkerId(null);
+      };
+
+
+
+      // Heuristic to map Marker Label to Audio Part
+      // Heuristic to map Marker Label to Audio Part
+      const getAudioInfoForMarker = (marker) => {
+        if (!marker || !marker.label || !currentAudioConfig) return null;
+
+        const match = marker.label.match(/(\d+)/);
+        if (!match) return null;
+        const num = parseInt(match[1], 10);
+
+        // Find track that covers this number
+        const track = currentAudioConfig.tracks.find(t => num >= t.range[0] && num <= t.range[1]);
+        if (!track) return null;
+
+        return {
+          url: `${currentAudioConfig.baseDir}/${track.file}`,
+          name: track.label
+        };
+      };
+
+      const loadAudioToCache = async (url) => {
+        if (audioCache.current[url]) return audioCache.current[url];
+
+        setIsLoading(true);
+        try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          audioCache.current[url] = blobUrl;
+          return blobUrl;
+        } finally {
+          setIsLoading(false);
         }
       };
-      window.addEventListener('paste', handlePaste);
-      return () => window.removeEventListener('paste', handlePaste);
-    }, [processFiles, mode]);
 
-    // --- Navigation ---
-    const goToNextPage = () => { if (currentPageIndex < pages.length - 1) setCurrentPageIndex(prev => prev + 1); };
-    const goToPrevPage = () => { if (currentPageIndex > 0) setCurrentPageIndex(prev => prev - 1); };
-    const deletePage = (index) => {
-      const pageToDelete = pages[index];
-      setMarkers(prev => prev.filter(m => m.pageId !== pageToDelete.id));
-      const newPages = pages.filter((_, i) => i !== index);
-      setPages(newPages);
-      if (currentPageIndex >= newPages.length) setCurrentPageIndex(Math.max(0, newPages.length - 1));
-    };
+      // --- Audio Ops ---
+      const playSegment = async (marker) => {
+        if (!audioRef.current) return;
 
-    // --- Marker Ops ---
-    const addMarker = (e) => {
-      if (mode !== 'edit' || !imageContainerRef.current || pages.length === 0) return;
-      if (interactionState.type) return;
-      const rect = imageContainerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      const currentPage = pages[currentPageIndex];
-      const newMarker = {
-        id: Date.now(), x, y, width: 10, height: 5, startTime: 0, endTime: 10,
-        label: `No.${markers.length + 1}`, pageId: currentPage.id
-      };
-      setMarkers([...markers, newMarker]);
-      setSelectedMarkerId(newMarker.id);
-    };
-    const updateMarker = (id, field, value) => setMarkers(markers.map(m => m.id === id ? { ...m, [field]: value } : m));
-    const deleteMarker = (id) => {
-      setMarkers(markers.filter(m => m.id !== id));
-      if (selectedMarkerId === id) setSelectedMarkerId(null);
-    };
+        // 1. Page Navigation
+        const targetPageIndex = pages.findIndex(p => p.id === marker.pageId);
+        if (targetPageIndex !== -1 && targetPageIndex !== currentPageIndex) setCurrentPageIndex(targetPageIndex);
 
+        // 2. Determine required audio
+        const audioInfo = getAudioInfoForMarker(marker);
+        let targetBlobUrl = audioSrc;
+        let targetName = audioFileName;
 
+        if (audioInfo) {
+          // Ensure it is loaded
+          if (!audioCache.current[audioInfo.url]) {
+            targetBlobUrl = await loadAudioToCache(audioInfo.url);
+          } else {
+            targetBlobUrl = audioCache.current[audioInfo.url];
+          }
+          targetName = audioInfo.name;
+        }
 
-    // Heuristic to map Marker Label to Audio Part
-    // Heuristic to map Marker Label to Audio Part
-    const getAudioInfoForMarker = (marker) => {
-      if (!marker || !marker.label || !currentAudioConfig) return null;
-
-      const match = marker.label.match(/(\d+)/);
-      if (!match) return null;
-      const num = parseInt(match[1], 10);
-
-      // Find track that covers this number
-      const track = currentAudioConfig.tracks.find(t => num >= t.range[0] && num <= t.range[1]);
-      if (!track) return null;
-
-      return {
-        url: `${currentAudioConfig.baseDir}/${track.file}`,
-        name: track.label
-      };
-    };
-
-    const loadAudioToCache = async (url) => {
-      if (audioCache.current[url]) return audioCache.current[url];
-
-      setIsLoading(true);
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        audioCache.current[url] = blobUrl;
-        return blobUrl;
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // --- Audio Ops ---
-    const playSegment = async (marker) => {
-      if (!audioRef.current) return;
-
-      // 1. Page Navigation
-      const targetPageIndex = pages.findIndex(p => p.id === marker.pageId);
-      if (targetPageIndex !== -1 && targetPageIndex !== currentPageIndex) setCurrentPageIndex(targetPageIndex);
-
-      // 2. Determine required audio
-      const audioInfo = getAudioInfoForMarker(marker);
-      let targetBlobUrl = audioSrc;
-      let targetName = audioFileName;
-
-      if (audioInfo) {
-        // Ensure it is loaded
-        if (!audioCache.current[audioInfo.url]) {
-          targetBlobUrl = await loadAudioToCache(audioInfo.url);
+        // 3. Switch Audio if needed
+        if (targetBlobUrl !== audioSrc) {
+          setAudioSrc(targetBlobUrl);
+          setAudioFileName(targetName);
+          pendingPlayMarker.current = marker; // Queue play
+          // The useEffect below will trigger play when src changes
         } else {
-          targetBlobUrl = audioCache.current[audioInfo.url];
+          // 4. Just Play
+          audioRef.current.playbackRate = playbackRate;
+          audioRef.current.pause();
+          audioRef.current.currentTime = marker.startTime;
+          setCurrentMarkerId(marker.id);
+          audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
         }
-        targetName = audioInfo.name;
-      }
+      };
 
-      // 3. Switch Audio if needed
-      if (targetBlobUrl !== audioSrc) {
-        setAudioSrc(targetBlobUrl);
-        setAudioFileName(targetName);
-        pendingPlayMarker.current = marker; // Queue play
-        // The useEffect below will trigger play when src changes
-      } else {
-        // 4. Just Play
+      // Auto-play after audio switch
+      useEffect(() => {
+        if (pendingPlayMarker.current && audioRef.current && audioSrc) {
+          const marker = pendingPlayMarker.current;
+          pendingPlayMarker.current = null;
+
+          audioRef.current.playbackRate = playbackRate;
+          audioRef.current.currentTime = marker.startTime;
+          setCurrentMarkerId(marker.id);
+          audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
+        }
+      }, [audioSrc]);
+
+      // Auto-switch audio on page change
+      useEffect(() => {
+        if (mode !== 'practice' || pages.length === 0) return;
+
+        const currentPage = pages[currentPageIndex];
+        if (!currentPage) return;
+
+        const pageMarkers = markers.filter(m => m.pageId === currentPage.id);
+        if (pageMarkers.length === 0) return;
+
+        // Use first marker to determine page's audio
+        const info = getAudioInfoForMarker(pageMarkers[0]);
+        // Only switch if different AND valid
+        if (info && info.name !== audioFileName) {
+          (async () => {
+            try {
+              const blobUrl = await loadAudioToCache(info.url);
+              setAudioSrc(blobUrl);
+              setAudioFileName(info.name);
+              setIsPlaying(false);
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+              }
+            } catch (e) {
+              console.error("Auto-switch failed", e);
+            }
+          })();
+        }
+      }, [currentPageIndex, mode]);
+
+      const togglePlay = () => {
+        if (!audioRef.current) return;
         audioRef.current.playbackRate = playbackRate;
-        audioRef.current.pause();
-        audioRef.current.currentTime = marker.startTime;
-        setCurrentMarkerId(marker.id);
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
-      }
-    };
+        if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+        else { audioRef.current.play(); setIsPlaying(true); }
+      };
+      const toggleSpeed = () => {
+        const newRate = playbackRate === 1.0 ? 2.0 : 1.0;
+        setPlaybackRate(newRate);
+        if (audioRef.current) audioRef.current.playbackRate = newRate;
+      };
+      const seekRelative = (s) => {
+        if (!audioRef.current) return;
+        audioRef.current.currentTime = Math.min(Math.max(audioRef.current.currentTime + s, 0), duration);
+        setCurrentTime(audioRef.current.currentTime);
+      };
+      useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const handleTimeUpdate = () => {
+          setCurrentTime(audio.currentTime);
+          if (currentMarkerId && isPlaying) {
+            const activeMarker = markers.find(m => m.id === currentMarkerId);
+            if (activeMarker && audio.currentTime >= activeMarker.endTime) {
+              audio.pause(); setIsPlaying(false); setCurrentMarkerId(null); audio.currentTime = activeMarker.startTime;
+            }
+          }
+        };
+        const handleLoadedMetadata = () => setDuration(audio.duration);
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.playbackRate = playbackRate;
+        return () => {
+          audio.removeEventListener('timeupdate', handleTimeUpdate);
+          audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        };
+      }, [currentMarkerId, isPlaying, markers, playbackRate]);
 
-    // Auto-play after audio switch
-    useEffect(() => {
-      if (pendingPlayMarker.current && audioRef.current && audioSrc) {
-        const marker = pendingPlayMarker.current;
-        pendingPlayMarker.current = null;
-
-        audioRef.current.playbackRate = playbackRate;
-        audioRef.current.currentTime = marker.startTime;
-        setCurrentMarkerId(marker.id);
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(console.error);
-      }
-    }, [audioSrc]);
-
-    // Auto-switch audio on page change
-    useEffect(() => {
-      if (mode !== 'practice' || pages.length === 0) return;
+      const formatTime = (time) => {
+        if (isNaN(time)) return "0:00";
+        const m = Math.floor(time / 60);
+        const s = Math.floor(time % 60);
+        const ms = Math.floor((time % 1) * 10);
+        return `${m}:${s.toString().padStart(2, '0')}.${ms}`;
+      };
 
       const currentPage = pages[currentPageIndex];
-      if (!currentPage) return;
+      const currentMarkers = currentPage ? markers.filter(m => m.pageId === currentPage.id) : [];
+      if (mode === 'library') {
+        return (
+          <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
+            {showHomeworkModal && (
+              <HomeworkModal
+                config={printConfig}
+                setConfig={setPrintConfig}
+                onClose={() => setShowHomeworkModal(false)}
+                onPrint={() => { setShowHomeworkModal(false); setMode('print'); }}
+              />
+            )}
+            <div className="w-full max-w-4xl space-y-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg">
+                  <Database size={32} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">英検リスニング演習 Studio {isStudentMode && <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full ml-2 align-middle">生徒モード</span>}</h1>
+                  <p className="text-gray-500">ローカルデータベースモード</p>
+                </div>
+              </div>
 
-      const pageMarkers = markers.filter(m => m.pageId === currentPage.id);
-      if (pageMarkers.length === 0) return;
+              {/* Action Cards */}
+              {!isStudentMode ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  <button
+                    onClick={startNewProject}
+                    className="bg-white p-6 rounded-xl shadow-sm border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition flex flex-col items-center justify-center gap-4 group h-48"
+                  >
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition">
+                      <PlusCircle size={32} />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-bold text-lg text-blue-900">新規プロジェクト作成</h3>
+                      <p className="text-sm text-gray-500">画像と音声から新しい演習を作成</p>
+                    </div>
+                  </button>
 
-      // Use first marker to determine page's audio
-      const info = getAudioInfoForMarker(pageMarkers[0]);
-      // Only switch if different AND valid
-      if (info && info.name !== audioFileName) {
-        (async () => {
-          try {
-            const blobUrl = await loadAudioToCache(info.url);
-            setAudioSrc(blobUrl);
-            setAudioFileName(info.name);
-            setIsPlaying(false);
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.currentTime = 0;
-            }
-          } catch (e) {
-            console.error("Auto-switch failed", e);
-          }
-        })();
+                  <div className="bg-white p-6 rounded-xl shadow-md border flex flex-col justify-between h-48">
+                    <div>
+                      <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2"><CheckCircle size={20} /> 生徒用リンク</h3>
+                      <p className="text-gray-500 text-sm mt-2">
+                        トップ画面（プロジェクト一覧）の共有URLです。特定の課題を指定する場合は、下のリストから「課題作成」を行ってください。
+                      </p>
+                    </div>
+                    <button onClick={() => {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('student', 'true');
+                      url.searchParams.delete('projectId'); // Generic link
+                      navigator.clipboard.writeText(url.toString());
+                      alert("生徒用リンク（トップページ）をコピーしました！\n" + url.toString());
+                    }} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                      トップページURLをコピー
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Student Mode Actions */
+                <div className="bg-green-50 border border-green-200 p-6 rounded-xl text-green-800">
+                  <h3 className="font-bold flex items-center gap-2"><CheckCircle size={20} /> 学習を開始しましょう</h3>
+                  <p className="text-sm mt-1 mb-4">以下のリストからプロジェクトを選んでください。</p>
+                  <button onClick={() => fetchRemoteCatalog()} className="text-xs bg-white hover:bg-green-100 text-green-700 px-3 py-1.5 rounded transition border border-green-300">
+                    ↻ カタログ更新
+                  </button>
+                </div>
+              )}
+
+              {/* Project List */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Clock size={20} /> 学習プロジェクト
+                </h2>
+
+                {isLoading ? (
+                  <div className="text-center py-12 text-gray-400 animate-pulse">読み込み中...</div>
+                ) : projectList.length > 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y">
+                    {projectList.map(project => (
+                      <div key={project.id} onClick={() => project.isLocal ? handleOpenProject(project.id) : importRemoteProject(project)}
+                        className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                            <FileText size={24} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition">
+                              {project.title
+                                .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
+                                .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
+                                .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
+                            </h3>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                              <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} ページ</span>
+                              <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? '音声あり' : '音声なし'}</span>
+                              <span>更新: {new Date(project.updatedAt).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        {!isStudentMode && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setTargetPrintProject(project);
+                                setProjectTitle(project.title); // Set title for preview
+                                setProjectId(project.id); // Set ID for URL generation
+                                setShowHomeworkModal(true);
+                              }}
+                              className="p-2 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
+                              title="課題プリント作成"
+                            >
+                              <Printer size={20} />
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteProject(project.id, e)}
+                              className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition"
+                              title="削除"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-white rounded-xl border border-gray-200 text-gray-400">
+                    まだプロジェクトがありません
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
       }
-    }, [currentPageIndex, mode]);
 
-    const togglePlay = () => {
-      if (!audioRef.current) return;
-      audioRef.current.playbackRate = playbackRate;
-      if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
-      else { audioRef.current.play(); setIsPlaying(true); }
-    };
-    const toggleSpeed = () => {
-      const newRate = playbackRate === 1.0 ? 2.0 : 1.0;
-      setPlaybackRate(newRate);
-      if (audioRef.current) audioRef.current.playbackRate = newRate;
-    };
-    const seekRelative = (s) => {
-      if (!audioRef.current) return;
-      audioRef.current.currentTime = Math.min(Math.max(audioRef.current.currentTime + s, 0), duration);
-      setCurrentTime(audioRef.current.currentTime);
-    };
-    useEffect(() => {
-      const audio = audioRef.current;
-      if (!audio) return;
-      const handleTimeUpdate = () => {
-        setCurrentTime(audio.currentTime);
-        if (currentMarkerId && isPlaying) {
-          const activeMarker = markers.find(m => m.id === currentMarkerId);
-          if (activeMarker && audio.currentTime >= activeMarker.endTime) {
-            audio.pause(); setIsPlaying(false); setCurrentMarkerId(null); audio.currentTime = activeMarker.startTime;
-          }
+      if (mode === 'print') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('student', 'true');
+        if (projectId) {
+          url.searchParams.set('projectId', projectId);
         }
-      };
-      const handleLoadedMetadata = () => setDuration(audio.duration);
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.playbackRate = playbackRate;
-      return () => {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      };
-    }, [currentMarkerId, isPlaying, markers, playbackRate]);
+        return <PrintableSheet
+          title={projectTitle}
+          instructor={printConfig.instructor}
+          deadline={printConfig.deadline}
+          comment={printConfig.comment}
+          url={url.toString()}
+          onClose={() => setMode('library')}
+        />;
+      }
 
-    const formatTime = (time) => {
-      if (isNaN(time)) return "0:00";
-      const m = Math.floor(time / 60);
-      const s = Math.floor(time % 60);
-      const ms = Math.floor((time % 1) * 10);
-      return `${m}:${s.toString().padStart(2, '0')}.${ms}`;
-    };
-
-    const currentPage = pages[currentPageIndex];
-    const currentMarkers = currentPage ? markers.filter(m => m.pageId === currentPage.id) : [];
-    if (mode === 'library') {
+      // --- RENDER: EDITOR / PRACTICE MODE ---
       return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
+        <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans">
           {showHomeworkModal && (
             <HomeworkModal
               config={printConfig}
@@ -1133,392 +1246,240 @@
               onPrint={() => { setShowHomeworkModal(false); setMode('print'); }}
             />
           )}
-          <div className="w-full max-w-4xl space-y-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg">
-                <Database size={32} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">英検リスニング演習 Studio {isStudentMode && <span className="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full ml-2 align-middle">生徒モード</span>}</h1>
-                <p className="text-gray-500">ローカルデータベースモード</p>
+          {isLoading && <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center text-white"><div className="text-xl font-bold animate-pulse">処理中...</div></div>}
+          {isDraggingOver && <div className="fixed inset-0 bg-blue-500/90 z-50 flex items-center justify-center text-white backdrop-blur-sm"><div className="text-center p-8 border-4 border-dashed border-white/50 rounded-xl"><Upload size={64} className="mx-auto mb-4" /><h2 className="text-3xl font-bold">ファイルをドロップ</h2><p className="mt-2 text-blue-100">画像・音声を追加</p></div></div>}
+
+          {/* Header */}
+          <header className="bg-blue-600 text-white p-3 shadow-md flex justify-between items-center z-10 shrink-0">
+            <div className="flex items-center gap-4">
+              {!isRestrictedMode && (
+                <button onClick={() => setMode('library')} className="hover:bg-blue-700 p-2 rounded-lg transition" title="ライブラリに戻る">
+                  <ArrowLeft size={24} />
+                </button>
+              )}
+              <div className="flex items-center gap-2">
+                <Volume2 className="w-6 h-6" />
+                {mode === 'edit' ? (
+                  <input
+                    type="text"
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    className="bg-blue-700 text-white font-bold px-2 py-1 rounded border border-blue-500 hover:border-blue-300 focus:outline-none focus:border-white transition min-w-[200px]"
+                    placeholder="プロジェクト名を入力"
+                  />
+                ) : (
+                  <h1 className="text-lg font-bold hidden sm:block truncate max-w-[200px]">{projectTitle}</h1>
+                )}
               </div>
             </div>
-
-            {/* Action Cards */}
-            {!isStudentMode ? (
-              <div className="grid md:grid-cols-2 gap-4">
-                <button
-                  onClick={startNewProject}
-                  className="bg-white p-6 rounded-xl shadow-sm border-2 border-dashed border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition flex flex-col items-center justify-center gap-4 group h-48"
-                >
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition">
-                    <PlusCircle size={32} />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-bold text-lg text-blue-900">新規プロジェクト作成</h3>
-                    <p className="text-sm text-gray-500">画像と音声から新しい演習を作成</p>
-                  </div>
-                </button>
-
-                <div className="bg-white p-6 rounded-xl shadow-md border flex flex-col justify-between h-48">
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2"><CheckCircle size={20} /> 生徒用リンク</h3>
-                    <p className="text-gray-500 text-sm mt-2">
-                      トップ画面（プロジェクト一覧）の共有URLです。特定の課題を指定する場合は、下のリストから「課題作成」を行ってください。
-                    </p>
-                  </div>
-                  <button onClick={() => {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('student', 'true');
-                    url.searchParams.delete('projectId'); // Generic link
-                    navigator.clipboard.writeText(url.toString());
-                    alert("生徒用リンク（トップページ）をコピーしました！\n" + url.toString());
-                  }} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-                    トップページURLをコピー
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Student Mode Actions */
-              <div className="bg-green-50 border border-green-200 p-6 rounded-xl text-green-800">
-                <h3 className="font-bold flex items-center gap-2"><CheckCircle size={20} /> 学習を開始しましょう</h3>
-                <p className="text-sm mt-1 mb-4">以下のリストからプロジェクトを選んでください。</p>
-                <button onClick={() => fetchRemoteCatalog()} className="text-xs bg-white hover:bg-green-100 text-green-700 px-3 py-1.5 rounded transition border border-green-300">
-                  ↻ カタログ更新
-                </button>
+            {pages.length > 0 && (
+              <div className="flex items-center gap-4 bg-white/10 px-4 py-2 rounded-xl mx-4 border border-white/20 shadow-sm backdrop-blur-sm">
+                <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="前のページ"><ChevronLeft size={32} strokeWidth={3} /></button>
+                <span className="text-xl font-bold font-mono min-w-[100px] text-center text-white drop-shadow-md tracking-wider">Page {currentPageIndex + 1} <span className="text-sm opacity-70">/ {pages.length}</span></span>
+                <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="次のページ"><ChevronRight size={32} strokeWidth={3} /></button>
               </div>
             )}
-
-            {/* Project List */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Clock size={20} /> 学習プロジェクト
-              </h2>
-
-              {isLoading ? (
-                <div className="text-center py-12 text-gray-400 animate-pulse">読み込み中...</div>
-              ) : projectList.length > 0 ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y">
-                  {projectList.map(project => (
-                    <div key={project.id} onClick={() => project.isLocal ? handleOpenProject(project.id) : importRemoteProject(project)}
-                      className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                          <FileText size={24} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition">
-                            {project.title
-                              .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
-                              .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
-                              .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
-                          </h3>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                            <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} ページ</span>
-                            <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? '音声あり' : '音声なし'}</span>
-                            <span>更新: {new Date(project.updatedAt).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                      {!isStudentMode && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setTargetPrintProject(project);
-                              setProjectTitle(project.title); // Set title for preview
-                              setProjectId(project.id); // Set ID for URL generation
-                              setShowHomeworkModal(true);
-                            }}
-                            className="p-2 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
-                            title="課題プリント作成"
-                          >
-                            <Printer size={20} />
-                          </button>
-                          <button
-                            onClick={(e) => handleDeleteProject(project.id, e)}
-                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition"
-                            title="削除"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-200 text-gray-400">
-                  まだプロジェクトがありません
+            <div className="flex items-center gap-2 shrink-0">
+              {!isStudentMode && (
+                <div className="flex bg-blue-700 rounded-lg p-1 mr-2">
+                  <button onClick={handleExportJSON} className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-600 rounded" title="バックアップ(JSON)"><Download size={18} /></button>
+                  <button onClick={handleSaveToDB} className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-600 rounded flex items-center gap-1 px-2" title="DB保存"><Save size={18} /><span className="text-xs font-bold">保存</span></button>
                 </div>
               )}
+              <div className="flex bg-blue-700 rounded-lg p-1">
+                {!isStudentMode && (
+                  <button onClick={() => setMode('edit')} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'edit' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:text-white'}`}>編集</button>
+                )}
+                <button onClick={() => { setSelectedMarkerId(null); setMode('practice'); }} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' || isStudentMode ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:text-white'}`}>演習</button>
+              </div>
             </div>
+          </header>
+
+          <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 bg-gray-200 overflow-auto relative">
+              <div className="min-h-full p-4 sm:p-8 flex justify-center items-start">
+                {currentPage ? (
+                  <div className="relative shadow-xl bg-white select-none transition-all duration-300" style={{ maxWidth: '100%', width: 'fit-content' }}>
+                    <img ref={imageContainerRef} src={currentPage.src} alt={`Page ${currentPageIndex + 1}`} className="max-w-full h-auto block cursor-crosshair" onClick={addMarker} draggable={false} />
+                    {currentMarkers.map((marker) => {
+                      // Render-time label formatting (Q1 -> No.1)
+                      const displayLabel = marker.label.replace(/^Q(\d+)/, 'No.$1');
+
+                      return (
+                        <div key={marker.id}
+                          onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'move')}
+                          onClick={(e) => { e.stopPropagation(); if (mode === 'practice') playSegment(marker); else setSelectedMarkerId(marker.id); }}
+                          className={`absolute flex items-center justify-center transition-all ${mode === 'edit'
+                            ? (selectedMarkerId === marker.id ? 'border-2 border-blue-500 bg-blue-500/20 z-20 cursor-move' : 'border-2 border-blue-300 bg-blue-300/10 hover:bg-blue-300/20 z-10 cursor-pointer')
+                            : 'z-10 cursor-pointer hover:scale-110'}`} // Practice mode: minimal layout container
+                          style={{
+                            left: `${marker.x}%`, top: `${marker.y}%`,
+                            width: `${marker.width || 10}%`, height: `${marker.height || 5}%`,
+                            // Practice mode: remove border/bg from container, focus on the inner button
+                            borderWidth: mode === 'practice' ? '0' : undefined,
+                            backgroundColor: mode === 'practice' ? 'transparent' : undefined
+                          }}>
+
+                          {/* Inner Content */}
+                          {mode === 'practice' ? (
+                            <div className={`flex items-center gap-1.5 bg-white/95 backdrop-blur shadow-md rounded-full px-3 py-1.5 border-2 border-green-500 text-green-700 transition-colors hover:bg-green-500 hover:text-white group`}>
+                              <Play size={16} fill="currentColor" strokeWidth={0} className="filter drop-shadow-sm" />
+                              <span className="font-bold text-sm tracking-tight">{displayLabel}</span>
+                            </div>
+                          ) : (
+                            // Edit Mode Label
+                            <>
+                              <span className={`text-xs font-bold px-1 rounded ${selectedMarkerId === marker.id ? 'bg-blue-600 text-white' : 'bg-white/80 text-gray-700'}`}>{displayLabel}</span>
+                              {selectedMarkerId === marker.id && (
+                                <div onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'resize')} className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 cursor-nwse-resize z-30 flex items-center justify-center" style={{ transform: 'translate(50%, 50%)' }}>
+                                  <Maximize2 size={8} className="text-white transform rotate-90" />
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">Page {currentPageIndex + 1}</div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400 space-y-4 max-w-md text-center my-auto h-[80vh]">
+                    <div className="p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-100">
+                      <Upload size={48} className="mx-auto mb-2 text-gray-400" />
+                      <p className="text-lg font-bold text-gray-600">ファイルをドロップ</p>
+                      <p className="text-sm">画像・音声をドラッグ＆ドロップ</p>
+                      <p className="text-xs text-blue-500 mt-2 font-semibold">Tip: スクショ(Ctrl+V)も使えます</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="w-80 bg-white border-l border-gray-200 flex flex-col shadow-xl z-20 shrink-0">
+              <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                {mode === 'edit' && (
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2"><Layers size={16} /> ページ管理</h3>
+                      {pages.length > 0 ? (
+                        <div className="bg-gray-50 border rounded-lg overflow-hidden">
+                          {pages.map((page, idx) => (
+                            <div key={page.id} onClick={() => setCurrentPageIndex(idx)} className={`flex items-center gap-2 p-2 cursor-pointer border-b last:border-0 hover:bg-gray-100 ${idx === currentPageIndex ? 'bg-blue-50 text-blue-700' : 'text-gray-600'}`}>
+                              <div className="w-5 text-xs text-center font-bold text-gray-400">{idx + 1}</div>
+                              <FileText size={14} />
+                              <span className="text-xs truncate flex-1">{page.name}</span>
+                              <button onClick={(e) => { e.stopPropagation(); deletePage(idx); }} className="text-gray-400 hover:text-red-500 p-1"><X size={14} /></button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : <div className="text-xs text-gray-500 italic p-2 border border-dashed rounded text-center">画像を追加してください</div>}
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center border-b pb-1 mb-2">
+                        <h3 className="font-bold text-gray-800 text-sm">マーカー設定</h3>
+                        <button onClick={renumberMarkers} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-0.5 rounded border border-gray-300 transition">連番リネーム</button>
+                      </div>
+                      {pages.length === 0 ? <p className="text-xs text-gray-400">まずページを追加</p> : selectedMarkerId ? (
+                        (() => {
+                          const m = markers.find(mark => mark.id === selectedMarkerId);
+                          if (!m) return null;
+                          return (
+                            <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm space-y-3 animate-fadeIn">
+                              <div className="flex justify-between items-center"><span className="font-bold text-blue-600 text-sm">編集中のマーカー</span><button onClick={() => deleteMarker(m.id)} className="text-red-500 hover:text-red-700 p-1"><Trash2 size={16} /></button></div>
+                              <div className="space-y-2"><label className="text-xs text-gray-500 block">ラベル</label><input type="text" value={m.label} onChange={(e) => updateMarker(m.id, 'label', e.target.value)} className="w-full border rounded px-2 py-1 text-sm" /></div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div><label className="text-xs text-gray-500 block">開始</label><input type="number" step="0.1" value={m.startTime} onChange={(e) => updateMarker(m.id, 'startTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'startTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 w-full py-1 rounded">現在位置</button></div>
+                                <div><label className="text-xs text-gray-500 block">終了</label><input type="number" step="0.1" value={m.endTime} onChange={(e) => updateMarker(m.id, 'endTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'endTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 w-full py-1 rounded">現在位置</button></div>
+                              </div>
+                              <button onClick={() => playSegment(m)} className="w-full mt-4 bg-green-600 text-white border-2 border-green-700 py-3 rounded-xl shadow-[0_4px_0_rgb(21,128,61)] hover:shadow-[0_2px_0_rgb(21,128,61)] hover:translate-y-[2px] transition-all flex items-center justify-center gap-3 active:shadow-none active:translate-y-[4px]"><Play size={28} fill="currentColor" strokeWidth={0} /> <span className="text-lg font-bold">テスト再生</span></button>
+                            </div>
+                          )
+                        })()
+                      ) : <div className="text-center py-6 text-gray-400 bg-gray-50 rounded border border-dashed"><PlusCircle className="mx-auto mb-2 opacity-50" /><p className="text-xs">画像をクリックして<br />問題を追加</p></div>}
+                    </div>
+                  </div>
+                )}
+                {mode === 'practice' && (
+                  <div className="space-y-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-800"><h3 className="font-bold flex items-center gap-2 mb-1 text-sm"><CheckCircle size={16} /> 演習モード</h3></div>
+                    <div className="bg-white border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 px-3 py-2 border-b text-xs font-bold text-gray-500 flex justify-between items-center"><span>問題リスト</span><span className="font-normal text-gray-400">{markers.length}問</span></div>
+                      <div className="max-h-[60vh] overflow-y-auto">
+                        {pages.map((page, pIdx) => {
+                          const pageMarkers = markers.filter(m => m.pageId === page.id).sort((a, b) => a.id - b.id);
+                          if (pageMarkers.length === 0) return null;
+                          return (
+                            <div key={page.id}>
+                              <div className="bg-gray-50 px-4 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-t border-gray-100 sticky top-0">Page {pIdx + 1}</div>
+                              {pageMarkers.map(m => (
+                                <button key={m.id} onClick={() => playSegment(m)} className={`w-full text-left px-4 py-3 border-b last:border-0 flex items-center gap-3 hover:bg-gray-50 transition group ${currentMarkerId === m.id ? 'bg-green-50 text-green-800 font-bold border-l-4 border-l-green-500' : 'text-gray-700 border-l-4 border-l-transparent'}`}>
+                                  <div className={`p-2 rounded-full flex-shrink-0 transition-colors ${currentMarkerId === m.id ? 'bg-green-200 text-green-700' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-600'}`}>
+                                    <Play size={20} fill="currentColor" strokeWidth={0} />
+                                  </div>
+                                  <div className="flex-1 flex justify-between items-center min-w-0">
+                                    <span className="text-base truncate">{m.label}</span>
+                                    <span className="text-xs text-gray-400 font-mono flex-shrink-0 ml-2">{formatTime(m.startTime)}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border-t border-gray-200 p-4 z-30 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+            <div className="max-w-screen-2xl mx-auto space-y-2">
+              <div className="relative group w-full"><input type="range" min={0} max={duration || 100} step="0.1" value={currentTime} onChange={(e) => { const time = parseFloat(e.target.value); if (audioRef.current) audioRef.current.currentTime = time; setCurrentTime(time); }} disabled={!audioSrc} className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:h-5 transition-all disabled:opacity-50" /></div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <button onClick={() => seekRelative(-5)} disabled={!audioSrc} className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 transition shadow-sm disabled:opacity-50" title="5秒戻る"><RotateCcw size={16} /></button>
+                  <button onClick={togglePlay} disabled={!audioSrc} className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition shadow-sm disabled:bg-gray-400">{isPlaying ? <Pause size={20} /> : <Play size={20} />}</button>
+                  <button onClick={() => seekRelative(5)} disabled={!audioSrc} className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 transition shadow-sm disabled:opacity-50" title="5秒進む"><RotateCw size={16} /></button>
+                  <button onClick={toggleSpeed} disabled={!audioSrc} className="h-8 px-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 flex items-center justify-center gap-1 hover:bg-gray-200 transition text-xs font-bold disabled:opacity-50" title="再生速度切替"><Gauge size={14} />{playbackRate.toFixed(1)}x</button>
+                  <div className="flex flex-col justify-center h-10 border-l pl-4 ml-2">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">Audio</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] sm:max-w-xs leading-tight" title={audioFileName}>{audioFileName || "音声未選択"}</span>
+                      <select
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (!val) return;
+                          if (currentAudioConfig) {
+                            const track = currentAudioConfig.tracks.find(t => `${currentAudioConfig.baseDir}/${t.file}` === val);
+                            if (track) loadServerAudio(val, track.label);
+                          } else if (typeof SERVER_ASSETS !== 'undefined') {
+                            const opt = SERVER_ASSETS.audio.find(a => a.url === val);
+                            if (opt) loadServerAudio(opt.url, opt.name);
+                          }
+                          e.target.value = "";
+                        }}
+                        className="text-xs border rounded bg-gray-50 max-w-[80px] opacity-70 hover:opacity-100 transition"
+                      >
+                        <option value="">Load...</option>
+                        {typeof SERVER_ASSETS !== 'undefined' && SERVER_ASSETS.audio.map(a => <option key={a.url} value={a.url}>{a.name}</option>)}
+                        {currentAudioConfig && currentAudioConfig.tracks.map(t => (
+                          <option key={t.file} value={`${currentAudioConfig.baseDir}/${t.file}`}>{t.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-xl font-mono text-gray-700 font-bold">{formatTime(currentTime)} <span className="text-sm text-gray-400 font-normal">/ {formatTime(duration)}</span></div>
+              </div>
+            </div>
+            <audio ref={audioRef} src={audioSrc} />
           </div>
         </div>
       );
-    }
 
-    if (mode === 'print') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('student', 'true');
-      if (projectId) {
-        url.searchParams.set('projectId', projectId);
-      }
-      return <PrintableSheet
-        title={projectTitle}
-        instructor={printConfig.instructor}
-        deadline={printConfig.deadline}
-        comment={printConfig.comment}
-        url={url.toString()}
-        onClose={() => setMode('library')}
-      />;
-    }
-
-    // --- RENDER: EDITOR / PRACTICE MODE ---
-    return (
-      <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans">
-        {showHomeworkModal && (
-          <HomeworkModal
-            config={printConfig}
-            setConfig={setPrintConfig}
-            onClose={() => setShowHomeworkModal(false)}
-            onPrint={() => { setShowHomeworkModal(false); setMode('print'); }}
-          />
-        )}
-        {isLoading && <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center text-white"><div className="text-xl font-bold animate-pulse">処理中...</div></div>}
-        {isDraggingOver && <div className="fixed inset-0 bg-blue-500/90 z-50 flex items-center justify-center text-white backdrop-blur-sm"><div className="text-center p-8 border-4 border-dashed border-white/50 rounded-xl"><Upload size={64} className="mx-auto mb-4" /><h2 className="text-3xl font-bold">ファイルをドロップ</h2><p className="mt-2 text-blue-100">画像・音声を追加</p></div></div>}
-
-        {/* Header */}
-        <header className="bg-blue-600 text-white p-3 shadow-md flex justify-between items-center z-10 shrink-0">
-          <div className="flex items-center gap-4">
-            {!isRestrictedMode && (
-              <button onClick={() => setMode('library')} className="hover:bg-blue-700 p-2 rounded-lg transition" title="ライブラリに戻る">
-                <ArrowLeft size={24} />
-              </button>
-            )}
-            <div className="flex items-center gap-2">
-              <Volume2 className="w-6 h-6" />
-              {mode === 'edit' ? (
-                <input
-                  type="text"
-                  value={projectTitle}
-                  onChange={(e) => setProjectTitle(e.target.value)}
-                  className="bg-blue-700 text-white font-bold px-2 py-1 rounded border border-blue-500 hover:border-blue-300 focus:outline-none focus:border-white transition min-w-[200px]"
-                  placeholder="プロジェクト名を入力"
-                />
-              ) : (
-                <h1 className="text-lg font-bold hidden sm:block truncate max-w-[200px]">{projectTitle}</h1>
-              )}
-            </div>
-          </div>
-          {pages.length > 0 && (
-            <div className="flex items-center gap-4 bg-white/10 px-4 py-2 rounded-xl mx-4 border border-white/20 shadow-sm backdrop-blur-sm">
-              <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="前のページ"><ChevronLeft size={32} strokeWidth={3} /></button>
-              <span className="text-xl font-bold font-mono min-w-[100px] text-center text-white drop-shadow-md tracking-wider">Page {currentPageIndex + 1} <span className="text-sm opacity-70">/ {pages.length}</span></span>
-              <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="次のページ"><ChevronRight size={32} strokeWidth={3} /></button>
-            </div>
-          )}
-          <div className="flex items-center gap-2 shrink-0">
-            {!isStudentMode && (
-              <div className="flex bg-blue-700 rounded-lg p-1 mr-2">
-                <button onClick={handleExportJSON} className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-600 rounded" title="バックアップ(JSON)"><Download size={18} /></button>
-                <button onClick={handleSaveToDB} className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-600 rounded flex items-center gap-1 px-2" title="DB保存"><Save size={18} /><span className="text-xs font-bold">保存</span></button>
-              </div>
-            )}
-            <div className="flex bg-blue-700 rounded-lg p-1">
-              {!isStudentMode && (
-                <button onClick={() => setMode('edit')} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'edit' ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:text-white'}`}>編集</button>
-              )}
-              <button onClick={() => { setSelectedMarkerId(null); setMode('practice'); }} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' || isStudentMode ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:text-white'}`}>演習</button>
-            </div>
-          </div>
-        </header>
-
-        <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 bg-gray-200 overflow-auto relative">
-            <div className="min-h-full p-4 sm:p-8 flex justify-center items-start">
-              {currentPage ? (
-                <div className="relative shadow-xl bg-white select-none transition-all duration-300" style={{ maxWidth: '100%', width: 'fit-content' }}>
-                  <img ref={imageContainerRef} src={currentPage.src} alt={`Page ${currentPageIndex + 1}`} className="max-w-full h-auto block cursor-crosshair" onClick={addMarker} draggable={false} />
-                  {currentMarkers.map((marker) => {
-                    // Render-time label formatting (Q1 -> No.1)
-                    const displayLabel = marker.label.replace(/^Q(\d+)/, 'No.$1');
-
-                    return (
-                      <div key={marker.id}
-                        onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'move')}
-                        onClick={(e) => { e.stopPropagation(); if (mode === 'practice') playSegment(marker); else setSelectedMarkerId(marker.id); }}
-                        className={`absolute flex items-center justify-center transition-all ${mode === 'edit'
-                          ? (selectedMarkerId === marker.id ? 'border-2 border-blue-500 bg-blue-500/20 z-20 cursor-move' : 'border-2 border-blue-300 bg-blue-300/10 hover:bg-blue-300/20 z-10 cursor-pointer')
-                          : 'z-10 cursor-pointer hover:scale-110'}`} // Practice mode: minimal layout container
-                        style={{
-                          left: `${marker.x}%`, top: `${marker.y}%`,
-                          width: `${marker.width || 10}%`, height: `${marker.height || 5}%`,
-                          // Practice mode: remove border/bg from container, focus on the inner button
-                          borderWidth: mode === 'practice' ? '0' : undefined,
-                          backgroundColor: mode === 'practice' ? 'transparent' : undefined
-                        }}>
-
-                        {/* Inner Content */}
-                        {mode === 'practice' ? (
-                          <div className={`flex items-center gap-1.5 bg-white/95 backdrop-blur shadow-md rounded-full px-3 py-1.5 border-2 border-green-500 text-green-700 transition-colors hover:bg-green-500 hover:text-white group`}>
-                            <Play size={16} fill="currentColor" strokeWidth={0} className="filter drop-shadow-sm" />
-                            <span className="font-bold text-sm tracking-tight">{displayLabel}</span>
-                          </div>
-                        ) : (
-                          // Edit Mode Label
-                          <>
-                            <span className={`text-xs font-bold px-1 rounded ${selectedMarkerId === marker.id ? 'bg-blue-600 text-white' : 'bg-white/80 text-gray-700'}`}>{displayLabel}</span>
-                            {selectedMarkerId === marker.id && (
-                              <div onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'resize')} className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 cursor-nwse-resize z-30 flex items-center justify-center" style={{ transform: 'translate(50%, 50%)' }}>
-                                <Maximize2 size={8} className="text-white transform rotate-90" />
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">Page {currentPageIndex + 1}</div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-gray-400 space-y-4 max-w-md text-center my-auto h-[80vh]">
-                  <div className="p-6 border-2 border-dashed border-gray-300 rounded-xl bg-gray-100">
-                    <Upload size={48} className="mx-auto mb-2 text-gray-400" />
-                    <p className="text-lg font-bold text-gray-600">ファイルをドロップ</p>
-                    <p className="text-sm">画像・音声をドラッグ＆ドロップ</p>
-                    <p className="text-xs text-blue-500 mt-2 font-semibold">Tip: スクショ(Ctrl+V)も使えます</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="w-80 bg-white border-l border-gray-200 flex flex-col shadow-xl z-20 shrink-0">
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-              {mode === 'edit' && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2"><Layers size={16} /> ページ管理</h3>
-                    {pages.length > 0 ? (
-                      <div className="bg-gray-50 border rounded-lg overflow-hidden">
-                        {pages.map((page, idx) => (
-                          <div key={page.id} onClick={() => setCurrentPageIndex(idx)} className={`flex items-center gap-2 p-2 cursor-pointer border-b last:border-0 hover:bg-gray-100 ${idx === currentPageIndex ? 'bg-blue-50 text-blue-700' : 'text-gray-600'}`}>
-                            <div className="w-5 text-xs text-center font-bold text-gray-400">{idx + 1}</div>
-                            <FileText size={14} />
-                            <span className="text-xs truncate flex-1">{page.name}</span>
-                            <button onClick={(e) => { e.stopPropagation(); deletePage(idx); }} className="text-gray-400 hover:text-red-500 p-1"><X size={14} /></button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : <div className="text-xs text-gray-500 italic p-2 border border-dashed rounded text-center">画像を追加してください</div>}
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center border-b pb-1 mb-2">
-                      <h3 className="font-bold text-gray-800 text-sm">マーカー設定</h3>
-                      <button onClick={renumberMarkers} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-0.5 rounded border border-gray-300 transition">連番リネーム</button>
-                    </div>
-                    {pages.length === 0 ? <p className="text-xs text-gray-400">まずページを追加</p> : selectedMarkerId ? (
-                      (() => {
-                        const m = markers.find(mark => mark.id === selectedMarkerId);
-                        if (!m) return null;
-                        return (
-                          <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm space-y-3 animate-fadeIn">
-                            <div className="flex justify-between items-center"><span className="font-bold text-blue-600 text-sm">編集中のマーカー</span><button onClick={() => deleteMarker(m.id)} className="text-red-500 hover:text-red-700 p-1"><Trash2 size={16} /></button></div>
-                            <div className="space-y-2"><label className="text-xs text-gray-500 block">ラベル</label><input type="text" value={m.label} onChange={(e) => updateMarker(m.id, 'label', e.target.value)} className="w-full border rounded px-2 py-1 text-sm" /></div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div><label className="text-xs text-gray-500 block">開始</label><input type="number" step="0.1" value={m.startTime} onChange={(e) => updateMarker(m.id, 'startTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'startTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 w-full py-1 rounded">現在位置</button></div>
-                              <div><label className="text-xs text-gray-500 block">終了</label><input type="number" step="0.1" value={m.endTime} onChange={(e) => updateMarker(m.id, 'endTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'endTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 w-full py-1 rounded">現在位置</button></div>
-                            </div>
-                            <button onClick={() => playSegment(m)} className="w-full mt-4 bg-green-600 text-white border-2 border-green-700 py-3 rounded-xl shadow-[0_4px_0_rgb(21,128,61)] hover:shadow-[0_2px_0_rgb(21,128,61)] hover:translate-y-[2px] transition-all flex items-center justify-center gap-3 active:shadow-none active:translate-y-[4px]"><Play size={28} fill="currentColor" strokeWidth={0} /> <span className="text-lg font-bold">テスト再生</span></button>
-                          </div>
-                        )
-                      })()
-                    ) : <div className="text-center py-6 text-gray-400 bg-gray-50 rounded border border-dashed"><PlusCircle className="mx-auto mb-2 opacity-50" /><p className="text-xs">画像をクリックして<br />問題を追加</p></div>}
-                  </div>
-                </div>
-              )}
-              {mode === 'practice' && (
-                <div className="space-y-4">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-800"><h3 className="font-bold flex items-center gap-2 mb-1 text-sm"><CheckCircle size={16} /> 演習モード</h3></div>
-                  <div className="bg-white border rounded-lg overflow-hidden">
-                    <div className="bg-gray-100 px-3 py-2 border-b text-xs font-bold text-gray-500 flex justify-between items-center"><span>問題リスト</span><span className="font-normal text-gray-400">{markers.length}問</span></div>
-                    <div className="max-h-[60vh] overflow-y-auto">
-                      {pages.map((page, pIdx) => {
-                        const pageMarkers = markers.filter(m => m.pageId === page.id).sort((a, b) => a.id - b.id);
-                        if (pageMarkers.length === 0) return null;
-                        return (
-                          <div key={page.id}>
-                            <div className="bg-gray-50 px-4 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-t border-gray-100 sticky top-0">Page {pIdx + 1}</div>
-                            {pageMarkers.map(m => (
-                              <button key={m.id} onClick={() => playSegment(m)} className={`w-full text-left px-4 py-3 border-b last:border-0 flex items-center gap-3 hover:bg-gray-50 transition group ${currentMarkerId === m.id ? 'bg-green-50 text-green-800 font-bold border-l-4 border-l-green-500' : 'text-gray-700 border-l-4 border-l-transparent'}`}>
-                                <div className={`p-2 rounded-full flex-shrink-0 transition-colors ${currentMarkerId === m.id ? 'bg-green-200 text-green-700' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-600'}`}>
-                                  <Play size={20} fill="currentColor" strokeWidth={0} />
-                                </div>
-                                <div className="flex-1 flex justify-between items-center min-w-0">
-                                  <span className="text-base truncate">{m.label}</span>
-                                  <span className="text-xs text-gray-400 font-mono flex-shrink-0 ml-2">{formatTime(m.startTime)}</span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border-t border-gray-200 p-4 z-30 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-          <div className="max-w-screen-2xl mx-auto space-y-2">
-            <div className="relative group w-full"><input type="range" min={0} max={duration || 100} step="0.1" value={currentTime} onChange={(e) => { const time = parseFloat(e.target.value); if (audioRef.current) audioRef.current.currentTime = time; setCurrentTime(time); }} disabled={!audioSrc} className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:h-5 transition-all disabled:opacity-50" /></div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <button onClick={() => seekRelative(-5)} disabled={!audioSrc} className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 transition shadow-sm disabled:opacity-50" title="5秒戻る"><RotateCcw size={16} /></button>
-                <button onClick={togglePlay} disabled={!audioSrc} className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition shadow-sm disabled:bg-gray-400">{isPlaying ? <Pause size={20} /> : <Play size={20} />}</button>
-                <button onClick={() => seekRelative(5)} disabled={!audioSrc} className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-300 transition shadow-sm disabled:opacity-50" title="5秒進む"><RotateCw size={16} /></button>
-                <button onClick={toggleSpeed} disabled={!audioSrc} className="h-8 px-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-700 flex items-center justify-center gap-1 hover:bg-gray-200 transition text-xs font-bold disabled:opacity-50" title="再生速度切替"><Gauge size={14} />{playbackRate.toFixed(1)}x</button>
-                <div className="flex flex-col justify-center h-10 border-l pl-4 ml-2">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none">Audio</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] sm:max-w-xs leading-tight" title={audioFileName}>{audioFileName || "音声未選択"}</span>
-                    <select
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (!val) return;
-                        if (currentAudioConfig) {
-                          const track = currentAudioConfig.tracks.find(t => `${currentAudioConfig.baseDir}/${t.file}` === val);
-                          if (track) loadServerAudio(val, track.label);
-                        } else if (typeof SERVER_ASSETS !== 'undefined') {
-                          const opt = SERVER_ASSETS.audio.find(a => a.url === val);
-                          if (opt) loadServerAudio(opt.url, opt.name);
-                        }
-                        e.target.value = "";
-                      }}
-                      className="text-xs border rounded bg-gray-50 max-w-[80px] opacity-70 hover:opacity-100 transition"
-                    >
-                      <option value="">Load...</option>
-                      {typeof SERVER_ASSETS !== 'undefined' && SERVER_ASSETS.audio.map(a => <option key={a.url} value={a.url}>{a.name}</option>)}
-                      {currentAudioConfig && currentAudioConfig.tracks.map(t => (
-                        <option key={t.file} value={`${currentAudioConfig.baseDir}/${t.file}`}>{t.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="text-xl font-mono text-gray-700 font-bold">{formatTime(currentTime)} <span className="text-sm text-gray-400 font-normal">/ {formatTime(duration)}</span></div>
-            </div>
-          </div>
-          <audio ref={audioRef} src={audioSrc} />
-        </div>
-      </div>
-    );
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
   </script>
 </body>
 
