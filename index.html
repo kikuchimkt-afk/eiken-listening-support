@@ -56,42 +56,48 @@
       body {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        margin: 0;
+        padding: 0;
+        background: white;
       }
 
-      body * {
-        visibility: hidden;
+      /* 印刷モード時はReactでPrintableSheetのみ表示しているので、
+         body * { visibility: hidden } は不要かつ有害（モバイルで白紙原因） */
+
+      /* スクロールバーや余計な背景を消す */
+      #root,
+      .fixed.inset-0 {
+        position: static !important;
+        overflow: visible !important;
+        height: auto !important;
+        background: white !important;
       }
 
-      #printable-area,
-      #printable-area * {
-        visibility: visible;
+      /* ツールバーなど print:hidden が効かない場合の保険 */
+      .print\:hidden {
+        display: none !important;
       }
 
       #printable-area {
         position: relative;
-        /* absoluteから変更して中央寄せしやすくする */
         width: 210mm !important;
-        /* A4幅固定 */
         min-height: 297mm !important;
         margin: 0 auto !important;
-        /* 左右中央配置 */
         padding: 20mm !important;
-        /* 基本パディング */
 
-        /* ユーザー等の要望による90%縮小 & 中央配置調整 */
+        /* 90%縮小 */
         transform: scale(0.9);
         transform-origin: top center;
-        top: 10mm;
-        /* 上部に余白を追加 (縮小レイアウトのバランス調整) */
+        top: 0;
 
         box-shadow: none !important;
         background-color: white !important;
+        overflow: visible !important;
       }
 
       @page {
         size: A4 portrait;
         margin: 0;
-        /* ブラウザのヘッダー/フッター余白を排除 */
       }
     }
   </style>
@@ -336,9 +342,9 @@
                     <div className="w-px bg-gray-200 h-10 self-center print:bg-gray-400 mx-2"></div>
                     <div className="text-center group">
                       <p className="text-[10px] font-bold text-gray-400 uppercase print:text-gray-600 mb-2 tracking-widest">Score</p>
-                      <div className="flex items-end">
-                        <div className="border-b-2 border-gray-900 w-20 text-center text-3xl font-bold leading-none print:border-black h-8"></div>
-                        <span className="text-sm font-bold ml-2 text-gray-500 relative -bottom-1">/ 30</span>
+                      <div className="flex items-end justify-center">
+                        <div className="border-b-2 border-gray-900 w-20 h-8 print:border-black"></div>
+                        <span className="text-sm font-bold text-gray-500 ml-2 whitespace-nowrap flex-shrink-0 mb-1">/ 30</span>
                       </div>
                     </div>
                   </div>
