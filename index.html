@@ -1413,7 +1413,14 @@
                     placeholder="プロジェクト名"
                   />
                 ) : (
-                  <h1 className="text-sm sm:text-lg font-bold truncate">{projectTitle}</h1>
+                  <h1 className="text-sm sm:text-lg font-bold truncate">
+                    {projectTitle
+                      .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
+                      .replace(/Eiken\s+Grade\s+Pre-?2\s+Plus/i, '英検準2級プラス')
+                      .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
+                      .replace(/Eiken\s+Grade\s+Pre-?1/i, '英検準1級')
+                      .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
+                  </h1>
                 )}
               </div>
             </div>
