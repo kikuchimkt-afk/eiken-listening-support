@@ -1143,7 +1143,9 @@
         else { audioRef.current.play(); setIsPlaying(true); }
       };
       const toggleSpeed = () => {
-        const newRate = playbackRate === 1.0 ? 2.0 : 1.0;
+        const speeds = [1.0, 1.2, 1.5, 2.0, 0.8];
+        const currentIdx = speeds.indexOf(playbackRate);
+        const newRate = speeds[(currentIdx + 1) % speeds.length];
         setPlaybackRate(newRate);
         if (audioRef.current) audioRef.current.playbackRate = newRate;
       };
