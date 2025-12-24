@@ -365,6 +365,7 @@
         setMarkers([]);
         setAudioSrc(null);
         setAudioFileName(null);
+        setCurrentAudioConfig(null);
         setCurrentPageIndex(0);
         setMode('edit');
       };
@@ -454,8 +455,10 @@
             title: finalTitle,
             updatedAt: new Date().toISOString(),
             markers,
+            markers,
             pages: pagesForDB,
-            audio: audioForDB
+            audio: audioForDB,
+            audioConfig: currentAudioConfig
           };
 
           await saveProjectToDB(projectData);
@@ -644,7 +647,7 @@
             if (Math.abs(a.y - b.y) > 2) return a.y - b.y;
             return a.x - b.x;
           });
-          return sorted.map((m, i) => ({ ...m, label: `Q${i + 1}` }));
+          return sorted.map((m, i) => ({ ...m, label: `No.${i + 1}` }));
         });
       };
 
@@ -689,7 +692,7 @@
         const currentPage = pages[currentPageIndex];
         const newMarker = {
           id: Date.now(), x, y, width: 10, height: 5, startTime: 0, endTime: 10,
-          label: `Q${markers.length + 1}`, pageId: currentPage.id
+          label: `No.${markers.length + 1}`, pageId: currentPage.id
         };
         setMarkers([...markers, newMarker]);
         setSelectedMarkerId(newMarker.id);
@@ -998,10 +1001,10 @@
               </div>
             </div>
             {pages.length > 0 && (
-              <div className="flex items-center gap-2 bg-blue-700/50 px-3 py-1 rounded-full mx-2">
-                <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-1 hover:bg-blue-600 rounded-full disabled:opacity-30 transition"><ChevronLeft size={20} /></button>
-                <span className="text-sm font-mono min-w-[80px] text-center">Page {currentPageIndex + 1} / {pages.length}</span>
-                <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-1 hover:bg-blue-600 rounded-full disabled:opacity-30 transition"><ChevronRight size={20} /></button>
+              <div className="flex items-center gap-4 bg-white/10 px-4 py-2 rounded-xl mx-4 border border-white/20 shadow-sm backdrop-blur-sm">
+                <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="前のページ"><ChevronLeft size={32} strokeWidth={3} /></button>
+                <span className="text-xl font-bold font-mono min-w-[100px] text-center text-white drop-shadow-md tracking-wider">Page {currentPageIndex + 1} <span className="text-sm opacity-70">/ {pages.length}</span></span>
+                <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="次のページ"><ChevronRight size={32} strokeWidth={3} /></button>
               </div>
             )}
             <div className="flex items-center gap-2 shrink-0">
@@ -1085,7 +1088,7 @@
                                 <div><label className="text-xs text-gray-500 block">開始</label><input type="number" step="0.1" value={m.startTime} onChange={(e) => updateMarker(m.id, 'startTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'startTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 w-full py-1 rounded">現在位置</button></div>
                                 <div><label className="text-xs text-gray-500 block">終了</label><input type="number" step="0.1" value={m.endTime} onChange={(e) => updateMarker(m.id, 'endTime', parseFloat(e.target.value))} className="w-full border rounded px-2 py-1 text-sm font-mono" /><button onClick={() => audioRef.current && updateMarker(m.id, 'endTime', audioRef.current.currentTime)} className="mt-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 w-full py-1 rounded">現在位置</button></div>
                               </div>
-                              <button onClick={() => playSegment(m)} className="w-full mt-2 bg-green-50 text-green-700 border border-green-200 py-1 rounded text-sm hover:bg-green-100 flex items-center justify-center gap-1"><Play size={14} /> テスト再生</button>
+                              <button onClick={() => playSegment(m)} className="w-full mt-4 bg-green-600 text-white border-2 border-green-700 py-3 rounded-xl shadow-[0_4px_0_rgb(21,128,61)] hover:shadow-[0_2px_0_rgb(21,128,61)] hover:translate-y-[2px] transition-all flex items-center justify-center gap-3 active:shadow-none active:translate-y-[4px]"><Play size={28} fill="currentColor" strokeWidth={0} /> <span className="text-lg font-bold">テスト再生</span></button>
                             </div>
                           )
                         })()
