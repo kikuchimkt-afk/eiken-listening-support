@@ -405,6 +405,17 @@
       const [targetPrintProject, setTargetPrintProject] = useState(null); // Store which project to print
       const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
       const [uiVisible, setUiVisible] = useState(true);
+      const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+
+      // Detect mobile landscape for immersive mode
+      useEffect(() => {
+        const checkOrientation = () => {
+          setIsMobileLandscape(window.matchMedia('(max-height: 600px) and (orientation: landscape)').matches);
+        };
+        checkOrientation();
+        window.addEventListener('resize', checkOrientation);
+        return () => window.removeEventListener('resize', checkOrientation);
+      }, []);
 
       // Audio Playback
       const [isPlaying, setIsPlaying] = useState(false);
@@ -1323,7 +1334,7 @@
           {isDraggingOver && <div className="fixed inset-0 bg-blue-500/90 z-50 flex items-center justify-center text-white backdrop-blur-sm"><div className="text-center p-8 border-4 border-dashed border-white/50 rounded-xl"><Upload size={64} className="mx-auto mb-4" /><h2 className="text-3xl font-bold">ファイルをドロップ</h2><p className="mt-2 text-blue-100">画像・音声を追加</p></div></div>}
 
           {/* Header */}
-          <header className={`bg-blue-600 text-white p-3 shadow-md flex justify-between items-center z-50 shrink-0 transition-transform duration-300 md:relative md:translate-y-0 landscape:fixed landscape:top-0 landscape:w-full ${!uiVisible ? 'landscape:-translate-y-full' : ''}`}>
+          <header className={`bg-blue-600 text-white p-2 md:p-3 shadow-md flex justify-between items-center z-50 shrink-0 transition-transform duration-300 ${isMobileLandscape ? 'fixed top-0 w-full' : 'relative'} ${isMobileLandscape && !uiVisible ? '-translate-y-full' : 'translate-y-0'}`}>
             <div className="flex items-center gap-2">
               {!isRestrictedMode && (
                 <button onClick={() => setMode('library')} className="hover:bg-blue-700 p-2 rounded-lg transition" title="ライブラリに戻る">
@@ -1346,10 +1357,10 @@
               </div>
             </div>
             {pages.length > 0 && (
-              <div className="hidden md:flex items-center gap-4 bg-white/10 px-4 py-2 rounded-xl mx-4 border border-white/20 shadow-sm backdrop-blur-sm">
-                <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="前のページ"><ChevronLeft size={32} strokeWidth={3} /></button>
-                <span className="text-xl font-bold font-mono min-w-[100px] text-center text-white drop-shadow-md tracking-wider">Page {currentPageIndex + 1} <span className="text-sm opacity-70">/ {pages.length}</span></span>
-                <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="次のページ"><ChevronRight size={32} strokeWidth={3} /></button>
+              <div className="flex items-center gap-1 md:gap-4 bg-white/10 px-2 md:px-4 py-1 md:py-2 rounded-lg md:rounded-xl mx-1 md:mx-4 border border-white/20 shadow-sm backdrop-blur-sm">
+                <button onClick={goToPrevPage} disabled={currentPageIndex === 0} className="p-1 md:p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="前のページ"><ChevronLeft size={24} strokeWidth={3} /></button>
+                <span className="text-sm md:text-xl font-bold font-mono min-w-[40px] md:min-w-[100px] text-center text-white drop-shadow-md tracking-wider"><span className="hidden sm:inline">Page</span> {currentPageIndex + 1} <span className="text-[10px] md:text-sm opacity-70">/ {pages.length}</span></span>
+                <button onClick={goToNextPage} disabled={currentPageIndex === pages.length - 1} className="p-1 md:p-2 bg-white/20 hover:bg-white/30 rounded-lg disabled:opacity-30 transition hover:scale-105 active:scale-95 shadow-sm" title="次のページ"><ChevronRight size={24} strokeWidth={3} /></button>
               </div>
             )}
             <div className="flex items-center gap-1 shrink-0">
@@ -1534,7 +1545,7 @@
             </div>
           </div>
 
-          <div className={`bg-white border-t border-gray-200 p-4 z-30 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] transition-transform duration-300 md:relative md:translate-y-0 landscape:fixed landscape:bottom-0 landscape:w-full ${!uiVisible ? 'landscape:translate-y-full' : ''}`}>
+          <div className={`bg-white border-t border-gray-200 p-4 z-30 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] transition-transform duration-300 ${isMobileLandscape ? 'fixed bottom-0 w-full' : 'relative'} ${isMobileLandscape && !uiVisible ? 'translate-y-full' : 'translate-y-0'}`}>
             <div className="max-w-screen-2xl mx-auto space-y-2">
               <div className="relative group w-full"><input type="range" min={0} max={duration || 100} step="0.1" value={currentTime} onChange={(e) => { const time = parseFloat(e.target.value); if (audioRef.current) audioRef.current.currentTime = time; setCurrentTime(time); }} disabled={!audioSrc} className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:h-5 transition-all disabled:opacity-50" /></div>
               <div className="flex items-center justify-between">
