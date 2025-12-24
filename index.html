@@ -430,6 +430,35 @@
       const pendingPlayMarker = useRef(null);
       const pendingFullPlay = useRef(false);
 
+      // Swipe handling refs
+      const touchStartX = useRef(null);
+      const touchEndX = useRef(null);
+
+      const handleTouchStart = (e) => {
+        touchStartX.current = e.targetTouches[0].clientX;
+        touchEndX.current = null;
+      };
+
+      const handleTouchMove = (e) => {
+        touchEndX.current = e.targetTouches[0].clientX;
+      };
+
+      const handleTouchEnd = () => {
+        if (!touchStartX.current || !touchEndX.current) return;
+        const distance = touchStartX.current - touchEndX.current;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (mode !== 'edit') {
+          if (isLeftSwipe && currentPageIndex < pages.length - 1) {
+            goToNextPage();
+          }
+          if (isRightSwipe && currentPageIndex > 0) {
+            goToPrevPage();
+          }
+        }
+      };
+
       // --- Initial Load Logic ---
       useEffect(() => {
         const init = async () => {
@@ -1386,7 +1415,13 @@
             <div className="flex-1 bg-gray-200 overflow-auto relative">
               <div className="min-h-full p-4 sm:p-8 flex justify-center items-start">
                 {currentPage ? (
-                  <div className="relative shadow-xl bg-white select-none transition-all duration-300" style={{ maxWidth: '100%', width: 'fit-content' }}>
+                  <div
+                    className="relative shadow-xl bg-white select-none transition-all duration-300 touch-pan-y"
+                    style={{ maxWidth: '100%', width: 'fit-content' }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                  >
                     <img ref={imageContainerRef} src={currentPage.src} alt={`Page ${currentPageIndex + 1}`} className="max-w-full h-auto block cursor-crosshair" onClick={(e) => { if (mode === 'edit') addMarker(e); else setUiVisible(!uiVisible); }} draggable={false} />
                     {currentMarkers.map((marker) => {
                       // Render-time label formatting (Q1 -> No.1)
