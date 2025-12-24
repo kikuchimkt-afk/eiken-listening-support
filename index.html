@@ -997,7 +997,17 @@
               </button>
               <div className="flex items-center gap-2">
                 <Volume2 className="w-6 h-6" />
-                <h1 className="text-lg font-bold hidden sm:block truncate max-w-[200px]">{projectTitle}</h1>
+                {mode === 'edit' ? (
+                  <input
+                    type="text"
+                    value={projectTitle}
+                    onChange={(e) => setProjectTitle(e.target.value)}
+                    className="bg-blue-700 text-white font-bold px-2 py-1 rounded border border-blue-500 hover:border-blue-300 focus:outline-none focus:border-white transition min-w-[200px]"
+                    placeholder="プロジェクト名を入力"
+                  />
+                ) : (
+                  <h1 className="text-lg font-bold hidden sm:block truncate max-w-[200px]">{projectTitle}</h1>
+                )}
               </div>
             </div>
             {pages.length > 0 && (
