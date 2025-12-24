@@ -119,14 +119,15 @@
       ArrowLeft: (p) => <IconWrapper {...p}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></IconWrapper>,
       Scissors: (p) => <IconWrapper {...p}><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></IconWrapper>,
       FolderOpen: (p) => <IconWrapper {...p}><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-3.25 7a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v2"></path></IconWrapper>,
-      Printer: (p) => <IconWrapper {...p}><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></IconWrapper>
+      Printer: (p) => <IconWrapper {...p}><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></IconWrapper>,
+      Menu: (p) => <IconWrapper {...p}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></IconWrapper>
     };
 
     const {
       Play, Pause, Upload, Trash2, Volume2, PlusCircle, CheckCircle,
       ChevronLeft, ChevronRight, FileText, Layers, X,
       Maximize2, RotateCcw, RotateCw, Download, Save, Gauge,
-      Home, Database, Clock, ArrowLeft, Scissors, FolderOpen, Printer
+      Home, Database, Clock, ArrowLeft, Scissors, FolderOpen, Printer, Menu
     } = Icons;
 
     // --- Server Assets Configuration ---
@@ -402,6 +403,7 @@
       const [showHomeworkModal, setShowHomeworkModal] = useState(false);
       const [printConfig, setPrintConfig] = useState({ instructor: '', deadline: '', comment: '' });
       const [targetPrintProject, setTargetPrintProject] = useState(null); // Store which project to print
+      const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
       // Audio Playback
       const [isPlaying, setIsPlaying] = useState(false);
@@ -1335,6 +1337,9 @@
                 )}
                 <button onClick={() => { setSelectedMarkerId(null); setMode('practice'); }} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' || isStudentMode ? 'bg-white text-blue-700 shadow' : 'text-blue-100 hover:text-white'}`}>演習</button>
               </div>
+              <button onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} className="ml-2 md:hidden p-2 text-blue-100 hover:text-white rounded-lg">
+                {isMobileSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
             </div>
           </header>
 
@@ -1398,7 +1403,14 @@
               </div>
             </div>
 
-            <div className="w-80 bg-white border-l border-gray-200 flex flex-col shadow-xl z-20 shrink-0">
+            {isMobileSidebarOpen && (
+              <div className="fixed inset-0 bg-black/50 z-30 md:hidden animate-fadeIn" onClick={() => setIsMobileSidebarOpen(false)} />
+            )}
+
+            <div className={`w-80 bg-white border-l border-gray-200 flex flex-col shadow-xl z-40 shrink-0
+              fixed inset-y-0 right-0 h-full transition-transform duration-300 ease-in-out
+              md:relative md:translate-x-0 md:h-auto md:shadow-none
+              ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
               <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                 {mode === 'edit' && (
                   <div className="space-y-6">
