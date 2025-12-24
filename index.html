@@ -295,7 +295,14 @@
 
               <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-6">
                 <div className="flex-1">
-                  <h1 className="text-xl font-bold mb-2 break-words text-gray-800 mr-4">{title}</h1>
+                  <h1 className="text-xl font-bold mb-2 break-words text-gray-800 mr-4">
+                    {title
+                      .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
+                      .replace(/Eiken\s+Grade\s+Pre-?2\s+Plus/i, '英検準2級プラス')
+                      .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
+                      .replace(/Eiken\s+Grade\s+Pre-?1/i, '英検準1級')
+                      .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
+                  </h1>
                   <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Listening Assignment</h2>
                 </div>
                 <div className="flex gap-6 text-sm shrink-0">
