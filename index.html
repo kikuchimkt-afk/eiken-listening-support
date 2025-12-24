@@ -53,6 +53,11 @@
 
     /* Print Styles */
     @media print {
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       body * {
         visibility: hidden;
       }
@@ -233,13 +238,13 @@
         return (
           <div className="grid grid-cols-3 gap-6 mb-8 print:gap-4">
             {columns.map(([start, end], colIdx) => (
-              <div key={colIdx} className="border border-gray-800 rounded-lg overflow-hidden">
-                <div className="bg-gray-800 text-white p-1 text-center font-bold text-xs tracking-wider">No. {start} - {end}</div>
-                <div className="divide-y divide-gray-300">
+              <div key={colIdx} className="border border-gray-800 rounded-lg overflow-hidden print:border-gray-800">
+                <div className="bg-gray-800 text-white p-1 text-center font-bold text-xs tracking-wider print:bg-gray-800 print:text-white">No. {start} - {end}</div>
+                <div className="divide-y divide-gray-300 print:divide-gray-400">
                   {Array.from({ length: end - start + 1 }, (_, i) => start + i).map(num => (
                     <div key={num} className="flex h-8 bg-white print:h-9">
-                      <div className="w-10 flex items-center justify-center font-bold text-xs border-r border-gray-300 bg-gray-100 text-gray-700 print:bg-transparent">{num}</div>
-                      <div className="flex-1 border-r border-gray-300 relative"></div>
+                      <div className="w-10 flex items-center justify-center font-bold text-xs border-r border-gray-300 print:border-gray-400 bg-gray-100 text-gray-700 print:bg-gray-100">{num}</div>
+                      <div className="flex-1 border-r border-gray-300 print:border-gray-400 relative"></div>
                       <div className="w-10 relative flex items-center justify-center">
                         <div className="w-5 h-5 rounded-full border border-gray-300 print:border-gray-400"></div>
                       </div>
@@ -267,7 +272,7 @@
 
           {/* A4 Sheet */}
           <div className="flex-1 bg-gray-100 p-8 overflow-auto print:bg-white print:p-0 print:overflow-visible flex justify-center">
-            <div id="printable-area" className="bg-white shadow-xl print:shadow-none p-[15mm] print:p-[20mm] w-[210mm] print:w-full min-h-[297mm] text-gray-900 relative flex flex-col">
+            <div id="printable-area" className="bg-white shadow-xl print:shadow-none p-[15mm] print:px-[20mm] print:pt-[20mm] print:pb-[25mm] w-[210mm] print:w-full min-h-[297mm] text-gray-900 relative flex flex-col">
 
               <div className="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-6">
                 <div className="flex-1">
@@ -300,27 +305,27 @@
               <h3 className="text-center font-bold text-sm mb-2 text-gray-800 bg-gray-100 rounded-full w-40 mx-auto py-1 uppercase tracking-widest print:bg-transparent print:border print:border-gray-800">Answer Sheet</h3>
               {renderAnswerColumns()}
 
-              <div className="mt-auto pt-4 border-t-2 border-gray-800 border-dashed">
+              <div className="mt-auto pt-8 border-t-2 border-gray-800 border-dashed">
                 <div className="flex justify-between items-end">
-                  <div className="mb-2 text-xs text-gray-500">
-                    <p>● 答え合わせはアプリの最後で確認できます。</p>
+                  <div className="mb-2 text-xs text-gray-500 font-medium">
+                    <p className="mb-1">● 答え合わせはアプリの最後で確認できます。</p>
                     <p>● 自己採点後、日付と点数を記入して提出してください。</p>
                   </div>
-                  <div className="flex gap-6 border-2 border-gray-800 rounded-xl px-6 py-3 bg-white print:bg-transparent">
-                    <div className="text-center">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">Date</p>
-                      <div className="flex items-end h-8 gap-1 justify-center">
-                        <div className="border-b border-gray-800 w-8"></div>
-                        <span className="text-sm">/</span>
-                        <div className="border-b border-gray-800 w-8"></div>
+                  <div className="flex gap-8 border-2 border-gray-800 rounded-xl px-8 py-4 bg-white print:border-gray-800 shadow-sm print:shadow-none">
+                    <div className="text-center group">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase print:text-gray-600 mb-2 tracking-widest">Date</p>
+                      <div className="flex items-end gap-2 justify-center">
+                        <div className="border-b border-gray-800 w-10 print:border-black h-6"></div>
+                        <span className="text-lg text-gray-400">/</span>
+                        <div className="border-b border-gray-800 w-10 print:border-black h-6"></div>
                       </div>
                     </div>
-                    <div className="w-px bg-gray-300 h-10 self-center"></div>
-                    <div className="text-center">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">Score</p>
-                      <div className="flex items-end h-8">
-                        <div className="border-b-2 border-gray-900 w-16 text-center text-2xl font-bold leading-none"></div>
-                        <span className="text-sm font-bold ml-1 text-gray-500">/ 30</span>
+                    <div className="w-px bg-gray-200 h-10 self-center print:bg-gray-400 mx-2"></div>
+                    <div className="text-center group">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase print:text-gray-600 mb-2 tracking-widest">Score</p>
+                      <div className="flex items-end">
+                        <div className="border-b-2 border-gray-900 w-20 text-center text-3xl font-bold leading-none print:border-black h-8"></div>
+                        <span className="text-sm font-bold ml-2 text-gray-500 relative -bottom-1">/ 30</span>
                       </div>
                     </div>
                   </div>
