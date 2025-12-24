@@ -1557,10 +1557,17 @@
                       <div className="max-h-[60vh] overflow-y-auto">
                         {pages.map((page, pIdx) => {
                           const pageMarkers = markers.filter(m => m.pageId === page.id).sort((a, b) => a.id - b.id);
-                          if (pageMarkers.length === 0) return null;
+
                           return (
                             <div key={page.id}>
-                              <div className="bg-gray-50 px-4 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-t border-gray-100 sticky top-0">Page {pIdx + 1}</div>
+                              <div
+                                onClick={() => setCurrentPageIndex(pIdx)}
+                                className="bg-gray-50 px-4 py-1 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-t border-gray-100 sticky top-0 cursor-pointer hover:bg-gray-100 hover:text-gray-600 transition-colors flex justify-between items-center"
+                                title="ページを表示"
+                              >
+                                <span>Page {pIdx + 1}</span>
+                                {pageMarkers.length === 0 && <span className="text-[10px] font-normal opacity-70">View Only</span>}
+                              </div>
                               {pageMarkers.map(m => (
                                 <button key={m.id} onClick={() => playSegment(m)} className={`w-full text-left px-4 py-3 border-b last:border-0 flex items-center gap-3 hover:bg-gray-50 transition group ${currentMarkerId === m.id ? 'bg-green-50 text-green-800 font-bold border-l-4 border-l-green-500' : 'text-gray-700 border-l-4 border-l-transparent'}`}>
                                   <div className={`p-2 rounded-full flex-shrink-0 transition-colors ${currentMarkerId === m.id ? 'bg-green-200 text-green-700' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-600'}`}>
@@ -1572,6 +1579,11 @@
                                   </div>
                                 </button>
                               ))}
+                              {pageMarkers.length === 0 && (
+                                <div onClick={() => setCurrentPageIndex(pIdx)} className="p-4 text-xs text-center text-gray-400 italic cursor-pointer hover:bg-gray-50 hover:text-gray-600 transition">
+                                  <span>タップしてページを表示<br />(音声マーカーなし)</span>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
