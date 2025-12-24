@@ -73,7 +73,7 @@
 
       @page {
         size: A4;
-        margin: 20mm;
+        margin: 0mm;
       }
     }
   </style>
@@ -219,7 +219,7 @@
         if (qrRef.current) {
           qrRef.current.innerHTML = "";
           try {
-            new QRCode(qrRef.current, { text: url, width: 96, height: 96 });
+            new QRCode(qrRef.current, { text: url, width: 140, height: 140 });
           } catch (e) {
             console.error("QRCode Error", e);
             qrRef.current.innerHTML = "QR Error";
@@ -237,7 +237,7 @@
                 <div className="divide-y divide-gray-300">
                   {Array.from({ length: end - start + 1 }, (_, i) => start + i).map(num => (
                     <div key={num} className="flex h-8 bg-white print:h-9">
-                      <div className="w-10 flex items-center justify-center font-bold text-xs border-r border-gray-300 bg-gray-100 text-gray-700">{num}</div>
+                      <div className="w-10 flex items-center justify-center font-bold text-xs border-r border-gray-300 bg-gray-100 text-gray-700 print:bg-transparent">{num}</div>
                       <div className="flex-1 border-r border-gray-300 relative"></div>
                       <div className="w-10 relative flex items-center justify-center">
                         <div className="w-5 h-5 rounded-full border border-gray-300 print:border-gray-400"></div>
@@ -276,7 +276,7 @@
                 <div className="flex gap-6 text-sm shrink-0">
                   <div className="text-right">
                     <p className="font-bold text-gray-400 text-[10px] uppercase">Instructor</p>
-                    <p className="font-bold text-lg min-w-[80px] border-b border-gray-300">{instructor}</p>
+                    <p className="font-bold text-lg min-w-[80px] border-b border-gray-300">{instructor ? (instructor.trim().endsWith('講師') ? instructor : instructor + ' 講師') : ''}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-400 text-[10px] uppercase">Deadline</p>
@@ -285,18 +285,18 @@
                 </div>
               </div>
 
-              <div className="flex gap-6 mb-6 h-28">
-                <div className="flex-1 border border-gray-300 rounded-lg p-3 bg-gray-50 print:bg-transparent flex flex-col">
+              <div className="flex gap-6 mb-6">
+                <div className="flex-1 border border-gray-300 rounded-lg p-3 bg-gray-50 print:bg-white flex flex-col">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Message</p>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed flex-1">{comment}</p>
                 </div>
-                <div className="w-24 shrink-0 flex flex-col items-center justify-center border border-gray-200 rounded-lg p-2 gap-1">
+                <div className="w-40 shrink-0 flex flex-col items-center justify-center border border-gray-200 rounded-lg p-2 gap-1">
                   <div ref={qrRef} className="bg-white mix-blend-multiply"></div>
                   <p className="text-[8px] text-center font-bold text-gray-500 tracking-wider">SCAN TO START</p>
                 </div>
               </div>
 
-              <h3 className="text-center font-bold text-sm mb-2 text-gray-800 bg-gray-100 rounded-full w-40 mx-auto py-1 uppercase tracking-widest print:bg-gray-100">Answer Sheet</h3>
+              <h3 className="text-center font-bold text-sm mb-2 text-gray-800 bg-gray-100 rounded-full w-40 mx-auto py-1 uppercase tracking-widest print:bg-transparent print:border print:border-gray-800">Answer Sheet</h3>
               {renderAnswerColumns()}
 
               <div className="mt-auto pt-4 border-t-2 border-gray-800 border-dashed">
@@ -347,7 +347,7 @@
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">提出期限</label>
-            <input type="text" className="w-full border rounded p-2" placeholder="例: 来週の月曜日まで" value={config.deadline} onChange={e => setConfig({ ...config, deadline: e.target.value })} />
+            <input type="date" className="w-full border rounded p-2" value={config.deadline} onChange={e => setConfig({ ...config, deadline: e.target.value })} />
           </div>
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">コメント / 学習のねらい</label>
@@ -1159,54 +1159,93 @@
                 {isLoading ? (
                   <div className="text-center py-12 text-gray-400 animate-pulse">読み込み中...</div>
                 ) : projectList.length > 0 ? (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y">
-                    {projectList.map(project => (
-                      <div key={project.id} onClick={() => project.isLocal ? handleOpenProject(project.id) : importRemoteProject(project)}
-                        className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                            <FileText size={24} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition">
-                              {project.title
-                                .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
-                                .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
-                                .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
+                  <div className="space-y-10">
+                    {(() => {
+                      const categories = [
+                        { id: 'l5', label: '英検5級', match: (s) => /level5|Grade\s*5/i.test(s) },
+                        { id: 'l4', label: '英検4級', match: (s) => /level4|Grade\s*4/i.test(s) },
+                        { id: 'l3', label: '英検3級', match: (s) => /level3|Grade\s*3/i.test(s) },
+                        { id: 'lp2', label: '英検準2級', match: (s) => /levelpre2(?!plus)|Grade\s*Pre-?2(?!.*Plus)/i.test(s) },
+                        { id: 'lp2p', label: '英検準2級プラス', match: (s) => /levelpre2plus|Grade\s*Pre-?2\s*Plus/i.test(s) },
+                        { id: 'l2', label: '英検2級', match: (s) => /(level2|Grade\s*2)(?!.*Pre)/i.test(s) },
+                        { id: 'lp1', label: '英検準1級', match: (s) => /levelpre1|Grade\s*Pre-?1/i.test(s) },
+                      ];
+
+                      const groups = {};
+                      const others = [];
+                      categories.forEach(c => groups[c.id] = []);
+
+                      projectList.forEach(p => {
+                        const s = (p.id + " " + p.title).toLowerCase();
+                        const cat = categories.find(c => c.match(s));
+                        if (cat) groups[cat.id].push(p);
+                        else others.push(p);
+                      });
+
+                      return [...categories, { id: 'other', label: 'その他' }].map(cat => {
+                        const list = cat.id === 'other' ? others : groups[cat.id];
+                        if (!list || list.length === 0) return null;
+                        return (
+                          <div key={cat.id}>
+                            <h3 className="font-bold text-gray-500 text-sm mb-3 pl-3 border-l-4 border-blue-500 flex items-center gap-2">
+                              {cat.label}
+                              <span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full">{list.length}</span>
                             </h3>
-                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                              <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} ページ</span>
-                              <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? '音声あり' : '音声なし'}</span>
-                              <span>更新: {new Date(project.updatedAt).toLocaleString()}</span>
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y">
+                              {list.map(project => (
+                                <div key={project.id} onClick={() => project.isLocal ? handleOpenProject(project.id) : importRemoteProject(project)}
+                                  className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer transition group">
+                                  <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                      <FileText size={24} />
+                                    </div>
+                                    <div>
+                                      <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition">
+                                        {project.title
+                                          .replace(/(\d{4})\s+Session\s+(\d+)/i, '$1年度 第$2回')
+                                          .replace(/Eiken\s+Grade\s+Pre-?2\s+Plus/i, '英検準2級プラス')
+                                          .replace(/Eiken\s+Grade\s+Pre-?2/i, '英検準2級')
+                                          .replace(/Eiken\s+Grade\s+Pre-?1/i, '英検準1級')
+                                          .replace(/Eiken\s+Grade\s+(\d+)/i, '英検$1級')}
+                                      </h3>
+                                      <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                                        <span className="flex items-center gap-1"><Layers size={12} /> {project.pagesCount} ページ</span>
+                                        <span className="flex items-center gap-1"><Volume2 size={12} /> {project.hasAudio ? '音声あり' : '音声なし'}</span>
+                                        <span>更新: {new Date(project.updatedAt).toLocaleString()}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {!isStudentMode && (
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setTargetPrintProject(project);
+                                          setProjectTitle(project.title);
+                                          setProjectId(project.id);
+                                          setShowHomeworkModal(true);
+                                        }}
+                                        className="p-2 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
+                                        title="課題プリント作成"
+                                      >
+                                        <Printer size={20} />
+                                      </button>
+                                      <button
+                                        onClick={(e) => handleDeleteProject(project.id, e)}
+                                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition"
+                                        title="削除"
+                                      >
+                                        <Trash2 size={20} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        </div>
-                        {!isStudentMode && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTargetPrintProject(project);
-                                setProjectTitle(project.title); // Set title for preview
-                                setProjectId(project.id); // Set ID for URL generation
-                                setShowHomeworkModal(true);
-                              }}
-                              className="p-2 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
-                              title="課題プリント作成"
-                            >
-                              <Printer size={20} />
-                            </button>
-                            <button
-                              onClick={(e) => handleDeleteProject(project.id, e)}
-                              className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition"
-                              title="削除"
-                            >
-                              <Trash2 size={20} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        );
+                      });
+                    })()}
                   </div>
                 ) : (
                   <div className="text-center py-12 bg-white rounded-xl border border-gray-200 text-gray-400">
