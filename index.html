@@ -1029,14 +1029,45 @@
                 {currentPage ? (
                   <div className="relative shadow-xl bg-white select-none transition-all duration-300" style={{ maxWidth: '100%', width: 'fit-content' }}>
                     <img ref={imageContainerRef} src={currentPage.src} alt={`Page ${currentPageIndex + 1}`} className="max-w-full h-auto block cursor-crosshair" onClick={addMarker} draggable={false} />
-                    {currentMarkers.map((marker) => (
-                      <div key={marker.id} onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'move')} onClick={(e) => { e.stopPropagation(); if (mode === 'practice') playSegment(marker); else setSelectedMarkerId(marker.id); }}
-                        className={`absolute border-2 flex items-center justify-center transition-colors ${mode === 'edit' ? (selectedMarkerId === marker.id ? 'border-blue-500 bg-blue-500/20 z-20 cursor-move' : 'border-blue-300 bg-blue-300/10 hover:bg-blue-300/20 z-10 cursor-pointer') : (currentMarkerId === marker.id ? 'border-green-500 bg-green-500/30 z-10 cursor-pointer' : 'border-transparent hover:bg-blue-100/30 hover:border-blue-300/50 cursor-pointer')}`}
-                        style={{ left: `${marker.x}%`, top: `${marker.y}%`, width: `${marker.width || 10}%`, height: `${marker.height || 5}%` }}>
-                        <span className={`text-xs font-bold px-1 rounded ${mode === 'edit' && selectedMarkerId === marker.id ? 'bg-blue-600 text-white' : mode === 'practice' && currentMarkerId === marker.id ? 'bg-green-600 text-white' : 'bg-white/80 text-gray-700'}`}>{marker.label}</span>
-                        {mode === 'edit' && selectedMarkerId === marker.id && (<div onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'resize')} className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 cursor-nwse-resize z-30 flex items-center justify-center" style={{ transform: 'translate(50%, 50%)' }}><Maximize2 size={8} className="text-white transform rotate-90" /></div>)}
-                      </div>
-                    ))}
+                    {currentMarkers.map((marker) => {
+                      // Render-time label formatting (Q1 -> No.1)
+                      const displayLabel = marker.label.replace(/^Q(\d+)/, 'No.$1');
+
+                      return (
+                        <div key={marker.id}
+                          onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'move')}
+                          onClick={(e) => { e.stopPropagation(); if (mode === 'practice') playSegment(marker); else setSelectedMarkerId(marker.id); }}
+                          className={`absolute flex items-center justify-center transition-all ${mode === 'edit'
+                            ? (selectedMarkerId === marker.id ? 'border-2 border-blue-500 bg-blue-500/20 z-20 cursor-move' : 'border-2 border-blue-300 bg-blue-300/10 hover:bg-blue-300/20 z-10 cursor-pointer')
+                            : 'z-10 cursor-pointer hover:scale-110'}`} // Practice mode: minimal layout container
+                          style={{
+                            left: `${marker.x}%`, top: `${marker.y}%`,
+                            width: `${marker.width || 10}%`, height: `${marker.height || 5}%`,
+                            // Practice mode: remove border/bg from container, focus on the inner button
+                            borderWidth: mode === 'practice' ? '0' : undefined,
+                            backgroundColor: mode === 'practice' ? 'transparent' : undefined
+                          }}>
+
+                          {/* Inner Content */}
+                          {mode === 'practice' ? (
+                            <div className={`flex items-center gap-1.5 bg-white/95 backdrop-blur shadow-md rounded-full px-3 py-1.5 border-2 border-green-500 text-green-700 transition-colors hover:bg-green-500 hover:text-white group`}>
+                              <Play size={16} fill="currentColor" strokeWidth={0} className="filter drop-shadow-sm" />
+                              <span className="font-bold text-sm tracking-tight">{displayLabel}</span>
+                            </div>
+                          ) : (
+                            // Edit Mode Label
+                            <>
+                              <span className={`text-xs font-bold px-1 rounded ${selectedMarkerId === marker.id ? 'bg-blue-600 text-white' : 'bg-white/80 text-gray-700'}`}>{displayLabel}</span>
+                              {selectedMarkerId === marker.id && (
+                                <div onMouseDown={(e) => handleMarkerMouseDown(e, marker, 'resize')} className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 cursor-nwse-resize z-30 flex items-center justify-center" style={{ transform: 'translate(50%, 50%)' }}>
+                                  <Maximize2 size={8} className="text-white transform rotate-90" />
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
                     <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">Page {currentPageIndex + 1}</div>
                   </div>
                 ) : (
