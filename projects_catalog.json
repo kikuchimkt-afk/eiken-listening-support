@@ -212,6 +212,41 @@
     {
         "audio":  [
                       {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "title":  "2024 Session 1 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2024-1",
+        "id":  "levelpre2_2024-1_data",
+        "json":  "data.json"
+    },
+    {
+        "audio":  [
+                      {
                           "label":  "5Q-part1",
                           "range":  [
                                         1,
@@ -242,6 +277,32 @@
         "title":  "2025 Session 2 Eiken Grade 5",
         "dir":  "assets/level5/2025-2",
         "id":  "level5_2025-2_data",
+        "json":  "data.json"
+    },
+    {
+        "audio":  [
+                      {
+                          "label":  "2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "2Q-part2.mp3"
+                      }
+                  ],
+        "title":  "2025 Session 2 Eiken Grade 2",
+        "dir":  "assets/level2/2025-2",
+        "id":  "level2_2025-2_data",
         "json":  "data.json"
     }
 ]
