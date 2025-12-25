@@ -1,5 +1,372 @@
 ﻿[
     {
+        "id":  "level2_2025-2_data",
+        "title":  "2025 Session 2 Eiken Grade 2",
+        "dir":  "assets/level2/2025-2",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "2Q-part2.mp3"
+                      }
+                  ],
+        "pagesCount":  9,
+        "gradeSort":  30,
+        "year":  2025,
+        "session":  2
+    },
+    {
+        "id":  "level2_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade 2",
+        "dir":  "assets/level2/2025-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "2Q-part2.mp3"
+                      }
+                  ],
+        "pagesCount":  9,
+        "gradeSort":  30,
+        "year":  2025,
+        "session":  1
+    },
+    {
+        "id":  "level2_2024-3_data",
+        "title":  "2024 Session 3 Eiken Grade 2",
+        "dir":  "assets/level2/2024-3",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "2Q-part2.mp3"
+                      }
+                  ],
+        "pagesCount":  9,
+        "gradeSort":  30,
+        "year":  2024,
+        "session":  3
+    },
+    {
+        "id":  "levelpre2_2025-2_data",
+        "title":  "2025 Session 2 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2025-2",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  40,
+        "year":  2025,
+        "session":  2
+    },
+    {
+        "id":  "levelpre2_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2025-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  40,
+        "year":  2025,
+        "session":  1
+    },
+    {
+        "id":  "levelpre2_2024-3_data",
+        "title":  "2024 Session 3 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2024-3",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  40,
+        "year":  2024,
+        "session":  3
+    },
+    {
+        "id":  "levelpre2_2024-2_data",
+        "title":  "2024 Session 2 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2024-2",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  40,
+        "year":  2024,
+        "session":  2
+    },
+    {
+        "id":  "levelpre2_2024-1_data",
+        "title":  "2024 Session 1 Eiken Grade Pre-2",
+        "dir":  "assets/levelpre2/2024-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Q-part2.mp3"
+                      },
+                      {
+                          "label":  "P2Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "P2Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  40,
+        "year":  2024,
+        "session":  1
+    },
+    {
+        "id":  "level3_2025-2_data",
+        "title":  "2025 Session 2 Eiken Grade 3",
+        "dir":  "assets/level3/2025-2",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "3Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "3Q-part1.mp3"
+                      },
+                      {
+                          "label":  "3Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "3Q-part2.mp3"
+                      },
+                      {
+                          "label":  "3Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "3Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  50,
+        "year":  2025,
+        "session":  2
+    },
+    {
+        "id":  "level3_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade 3",
+        "dir":  "assets/level3/2025-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "3Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "3Q-part1.mp3"
+                      },
+                      {
+                          "label":  "3Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "3Q-part2.mp3"
+                      },
+                      {
+                          "label":  "3Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "3Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  5,
+        "gradeSort":  50,
+        "year":  2025,
+        "session":  1
+    },
+    {
+        "id":  "level4_2025-2_data",
+        "title":  "2025 Session 2 Eiken Grade 4",
+        "dir":  "assets/level4/2025-2",
+        "json":  "data.json",
         "audio":  [
                       {
                           "label":  "part1",
@@ -29,12 +396,16 @@
                           "file":  "part3.mp3"
                       }
                   ],
-        "title":  "2025 Session 2 Eiken Grade 4",
-        "dir":  "assets/level4/2025-2",
-        "id":  "level4_2025-2_data",
-        "json":  "data.json"
+        "pagesCount":  4,
+        "gradeSort":  60,
+        "year":  2025,
+        "session":  2
     },
     {
+        "id":  "level4_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade 4",
+        "dir":  "assets/level4/2025-1",
+        "json":  "data.json",
         "audio":  [
                       {
                           "label":  "4Q-part1",
@@ -64,292 +435,16 @@
                           "file":  "4Q-part3.mp3"
                       }
                   ],
-        "title":  "2025 Session 1 Eiken Grade 4",
-        "dir":  "assets/level4/2025-1",
-        "id":  "level4_2025-1_data",
-        "json":  "data.json"
+        "pagesCount":  5,
+        "gradeSort":  60,
+        "year":  2025,
+        "session":  1
     },
     {
-        "audio":  [
-                      {
-                          "label":  "3Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "3Q-part1.mp3"
-                      },
-                      {
-                          "label":  "3Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "3Q-part2.mp3"
-                      },
-                      {
-                          "label":  "3Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "3Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2025 Session 1 Eiken Grade 3",
-        "dir":  "assets/level3/2025-1",
-        "id":  "level3_2025-1_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "3Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "3Q-part1.mp3"
-                      },
-                      {
-                          "label":  "3Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "3Q-part2.mp3"
-                      },
-                      {
-                          "label":  "3Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "3Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2025 Session 2 Eiken Grade 3",
-        "dir":  "assets/level3/2025-2",
-        "id":  "level3_2025-2_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "P2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "P2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "P2Q-part2.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "P2Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2025 Session 2 Eiken Grade Pre-2",
-        "dir":  "assets/levelpre2/2025-2",
-        "id":  "levelpre2_2025-2_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "P2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "P2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "P2Q-part2.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "P2Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2025 Session 1 Eiken Grade Pre-2",
-        "dir":  "assets/levelpre2/2025-1",
-        "id":  "levelpre2_2025-1_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "P2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "P2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "P2Q-part2.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "P2Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2024 Session 3 Eiken Grade Pre-2",
-        "dir":  "assets/levelpre2/2024-3",
-        "id":  "levelpre2_2024-3_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "P2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "P2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "P2Q-part2.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "P2Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2024 Session 2 Eiken Grade Pre-2",
-        "dir":  "assets/levelpre2/2024-2",
-        "id":  "levelpre2_2024-2_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "P2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "P2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "P2Q-part2.mp3"
-                      },
-                      {
-                          "label":  "P2Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "P2Q-part3.mp3"
-                      }
-                  ],
-        "title":  "2024 Session 1 Eiken Grade Pre-2",
-        "dir":  "assets/levelpre2/2024-1",
-        "id":  "levelpre2_2024-1_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "5Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "5Q-part1.mp3"
-                      },
-                      {
-                          "label":  "5Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "5Q-part2.mp3"
-                      },
-                      {
-                          "label":  "5Q-part3",
-                          "range":  [
-                                        21,
-                                        30
-                                    ],
-                          "part":  3,
-                          "file":  "5Q-part3.mp3"
-                      }
-                  ],
+        "id":  "level5_2025-2_data",
         "title":  "2025 Session 2 Eiken Grade 5",
         "dir":  "assets/level5/2025-2",
-        "id":  "level5_2025-2_data",
-        "json":  "data.json"
-    },
-    {
+        "json":  "data.json",
         "audio":  [
                       {
                           "label":  "5Q-part1",
@@ -379,87 +474,48 @@
                           "file":  "5Q-part3.mp3"
                       }
                   ],
+        "pagesCount":  5,
+        "gradeSort":  70,
+        "year":  2025,
+        "session":  2
+    },
+    {
+        "id":  "level5_2025-1_data",
         "title":  "2025 Session 1 Eiken Grade 5",
         "dir":  "assets/level5/2025-1",
-        "id":  "level5_2025-1_data",
-        "json":  "data.json"
-    },
-    {
+        "json":  "data.json",
         "audio":  [
                       {
-                          "label":  "2Q-part1",
+                          "label":  "5Q-part1",
                           "range":  [
                                         1,
                                         10
                                     ],
                           "part":  1,
-                          "file":  "2Q-part1.mp3"
+                          "file":  "5Q-part1.mp3"
                       },
                       {
-                          "label":  "2Q-part2",
+                          "label":  "5Q-part2",
                           "range":  [
                                         11,
                                         20
                                     ],
                           "part":  2,
-                          "file":  "2Q-part2.mp3"
-                      }
-                  ],
-        "title":  "2025 Session 2 Eiken Grade 2",
-        "dir":  "assets/level2/2025-2",
-        "id":  "level2_2025-2_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "2Q-part1.mp3"
+                          "file":  "5Q-part2.mp3"
                       },
                       {
-                          "label":  "2Q-part2",
+                          "label":  "5Q-part3",
                           "range":  [
-                                        11,
-                                        20
+                                        21,
+                                        30
                                     ],
-                          "part":  2,
-                          "file":  "2Q-part2.mp3"
+                          "part":  3,
+                          "file":  "5Q-part3.mp3"
                       }
                   ],
-        "title":  "2025 Session 1 Eiken Grade 2",
-        "dir":  "assets/level2/2025-1",
-        "id":  "level2_2025-1_data",
-        "json":  "data.json"
-    },
-    {
-        "audio":  [
-                      {
-                          "label":  "2Q-part1",
-                          "range":  [
-                                        1,
-                                        10
-                                    ],
-                          "part":  1,
-                          "file":  "2Q-part1.mp3"
-                      },
-                      {
-                          "label":  "2Q-part2",
-                          "range":  [
-                                        11,
-                                        20
-                                    ],
-                          "part":  2,
-                          "file":  "2Q-part2.mp3"
-                      }
-                  ],
-        "title":  "2024 Session 3 Eiken Grade 2",
-        "dir":  "assets/level2/2024-3",
-        "id":  "level2_2024-3_data",
-        "json":  "data.json"
+        "pagesCount":  6,
+        "gradeSort":  70,
+        "year":  2025,
+        "session":  1
     }
 ]

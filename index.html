@@ -593,7 +593,7 @@
             isRemote: true,
             isLocal: false,
             updatedAt: new Date().toISOString(),
-            pagesCount: '-',
+            pagesCount: r.pagesCount || '-',
             hasAudio: r.audio && r.audio.length > 0
           }));
         return [...locals, ...remotes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
@@ -980,7 +980,7 @@
         const y = ((e.clientY - rect.top) / rect.height) * 100;
         const currentPage = pages[currentPageIndex];
         const newMarker = {
-          id: Date.now(), x, y, width: 10, height: 5, startTime: 0, endTime: 10,
+          id: Date.now(), x, y, width: 5, height: 2.5, startTime: 0, endTime: 10,
           label: `No.${markers.length + 1}`, pageId: currentPage.id
         };
         setMarkers([...markers, newMarker]);
