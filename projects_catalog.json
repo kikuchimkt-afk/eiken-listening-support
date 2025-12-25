@@ -435,5 +435,31 @@
         "dir":  "assets/level2/2025-1",
         "id":  "level2_2025-1_data",
         "json":  "data.json"
+    },
+    {
+        "audio":  [
+                      {
+                          "label":  "2Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "2Q-part1.mp3"
+                      },
+                      {
+                          "label":  "2Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "2Q-part2.mp3"
+                      }
+                  ],
+        "title":  "2024 Session 3 Eiken Grade 2",
+        "dir":  "assets/level2/2024-3",
+        "id":  "level2_2024-3_data",
+        "json":  "data.json"
     }
 ]
