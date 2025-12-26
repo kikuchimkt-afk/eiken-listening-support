@@ -540,6 +540,45 @@
         "session":  3
     },
     {
+        "id":  "level5_2025-2(改)_data",
+        "title":  "2025 Session 2 Eiken Grade 5",
+        "dir":  "assets/level5/2025-2(改)",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "5Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "5Q-part1.mp3"
+                      },
+                      {
+                          "label":  "5Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "5Q-part2.mp3"
+                      },
+                      {
+                          "label":  "5Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "5Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  6,
+        "gradeSort":  70,
+        "year":  2025,
+        "session":  2
+    },
+    {
         "id":  "level5_2025-2_data",
         "title":  "2025 Session 2 Eiken Grade 5",
         "dir":  "assets/level5/2025-2",
@@ -577,6 +616,45 @@
         "gradeSort":  70,
         "year":  2025,
         "session":  2
+    },
+    {
+        "id":  "level5_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade 5",
+        "dir":  "assets/level5/2025-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "5Q-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "5Q-part1.mp3"
+                      },
+                      {
+                          "label":  "5Q-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "5Q-part2.mp3"
+                      },
+                      {
+                          "label":  "5Q-part3",
+                          "range":  [
+                                        21,
+                                        30
+                                    ],
+                          "part":  3,
+                          "file":  "5Q-part3.mp3"
+                      }
+                  ],
+        "pagesCount":  6,
+        "gradeSort":  70,
+        "year":  2025,
+        "session":  1
     },
     {
         "id":  "level5_2024-3_data",
