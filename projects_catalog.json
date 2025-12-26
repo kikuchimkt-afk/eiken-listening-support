@@ -120,6 +120,36 @@
         "session":  2
     },
     {
+        "id":  "levelpre2plus_2025-1_data",
+        "title":  "2025 Session 1 Eiken Grade Pre-2 Plus",
+        "dir":  "assets/levelpre2plus/2025-1",
+        "json":  "data.json",
+        "audio":  [
+                      {
+                          "label":  "P2Qplus-part1",
+                          "range":  [
+                                        1,
+                                        10
+                                    ],
+                          "part":  1,
+                          "file":  "P2Qplus-part1.mp3"
+                      },
+                      {
+                          "label":  "P2Qplus-part2",
+                          "range":  [
+                                        11,
+                                        20
+                                    ],
+                          "part":  2,
+                          "file":  "P2Qplus-part2.mp3"
+                      }
+                  ],
+        "pagesCount":  9,
+        "gradeSort":  35,
+        "year":  2025,
+        "session":  1
+    },
+    {
         "id":  "levelpre2_2025-2_data",
         "title":  "2025 Session 2 Eiken Grade Pre-2",
         "dir":  "assets/levelpre2/2025-2",
