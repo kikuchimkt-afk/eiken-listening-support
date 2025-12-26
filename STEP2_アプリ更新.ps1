@@ -75,7 +75,13 @@ foreach ($file in $projectFiles) {
                 if ($yearPart -match "(\d{4})") { $sortYear = [int]$matches[1] }
             }
         }
+        
+        # Use title from JSON if available (Allow manual override)
+        if ($jsonContent.title -and $jsonContent.title -ne "") {
+            $title = $jsonContent.title
+        }
     }
+
     catch {
         Write-Host "Skip: $($file.Name)"
         continue

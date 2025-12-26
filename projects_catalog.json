@@ -1,7 +1,7 @@
 ﻿[
     {
         "id":  "level2_2025-2_data",
-        "title":  "2025 Session 2 Eiken Grade 2",
+        "title":  "英検2級2025－2",
         "dir":  "assets/level2/2025-2",
         "json":  "data.json",
         "audio":  [
@@ -31,7 +31,7 @@
     },
     {
         "id":  "level2_2025-1_data",
-        "title":  "2025 Session 1 Eiken Grade 2",
+        "title":  "英検2級2025－1",
         "dir":  "assets/level2/2025-1",
         "json":  "data.json",
         "audio":  [
@@ -61,7 +61,7 @@
     },
     {
         "id":  "level2_2024-3_data",
-        "title":  "2024 Session 3 Eiken Grade 2",
+        "title":  "英検2級2024－3",
         "dir":  "assets/level2/2024-3",
         "json":  "data.json",
         "audio":  [
@@ -91,7 +91,7 @@
     },
     {
         "id":  "levelpre2plus_2025-2_data",
-        "title":  "2025 Session 2 Eiken Grade Pre-2 Plus",
+        "title":  "英検準2級プラス2025－2",
         "dir":  "assets/levelpre2plus/2025-2",
         "json":  "data.json",
         "audio":  [
@@ -121,7 +121,7 @@
     },
     {
         "id":  "levelpre2plus_2025-1_data",
-        "title":  "2025 Session 1 Eiken Grade Pre-2 Plus",
+        "title":  "英検準2級プラス2025－1",
         "dir":  "assets/levelpre2plus/2025-1",
         "json":  "data.json",
         "audio":  [
@@ -151,7 +151,7 @@
     },
     {
         "id":  "levelpre2_2025-2_data",
-        "title":  "2025 Session 2 Eiken Grade Pre-2",
+        "title":  "英検準2級2025－2",
         "dir":  "assets/levelpre2/2025-2",
         "json":  "data.json",
         "audio":  [
@@ -190,7 +190,7 @@
     },
     {
         "id":  "levelpre2_2025-1_data",
-        "title":  "2025 Session 1 Eiken Grade Pre-2",
+        "title":  "英検準2級2025－1",
         "dir":  "assets/levelpre2/2025-1",
         "json":  "data.json",
         "audio":  [
@@ -229,7 +229,7 @@
     },
     {
         "id":  "levelpre2_2024-3_data",
-        "title":  "2024 Session 3 Eiken Grade Pre-2",
+        "title":  "英検準2級2024－3",
         "dir":  "assets/levelpre2/2024-3",
         "json":  "data.json",
         "audio":  [
@@ -268,7 +268,7 @@
     },
     {
         "id":  "levelpre2_2024-2_data",
-        "title":  "2024 Session 2 Eiken Grade Pre-2",
+        "title":  "英検準2級2024－2",
         "dir":  "assets/levelpre2/2024-2",
         "json":  "data.json",
         "audio":  [
@@ -307,7 +307,7 @@
     },
     {
         "id":  "levelpre2_2024-1_data",
-        "title":  "2024 Session 1 Eiken Grade Pre-2",
+        "title":  "英検準2級2024－1",
         "dir":  "assets/levelpre2/2024-1",
         "json":  "data.json",
         "audio":  [
@@ -346,7 +346,7 @@
     },
     {
         "id":  "level3_2025-2_data",
-        "title":  "2025 Session 2 Eiken Grade 3",
+        "title":  "英検3級2025－2",
         "dir":  "assets/level3/2025-2",
         "json":  "data.json",
         "audio":  [
@@ -424,7 +424,7 @@
     },
     {
         "id":  "level3_2024-3_data",
-        "title":  "2024 Session 3 Eiken Grade 3",
+        "title":  "英検3級2024－3",
         "dir":  "assets/level3/2024-3",
         "json":  "data.json",
         "audio":  [
@@ -463,7 +463,7 @@
     },
     {
         "id":  "level3_2024-2_data",
-        "title":  "2024 Session 2 Eiken Grade 3",
+        "title":  "英検3級2024－2",
         "dir":  "assets/level3/2024-2",
         "json":  "data.json",
         "audio":  [
@@ -502,7 +502,7 @@
     },
     {
         "id":  "level4_2024-3_data",
-        "title":  "2024 Session 3 Eiken Grade 4",
+        "title":  "英検4級2024－3",
         "dir":  "assets/level4/2024-3",
         "json":  "data.json",
         "audio":  [
@@ -541,7 +541,7 @@
     },
     {
         "id":  "level5_2025-2(改)_data",
-        "title":  "2025 Session 2 Eiken Grade 5",
+        "title":  "英検5級22025－2(改)",
         "dir":  "assets/level5/2025-2(改)",
         "json":  "data.json",
         "audio":  [
@@ -580,7 +580,7 @@
     },
     {
         "id":  "level5_2025-2_data",
-        "title":  "2025 Session 2 Eiken Grade 5",
+        "title":  "英検5級2025－2",
         "dir":  "assets/level5/2025-2",
         "json":  "data.json",
         "audio":  [
@@ -619,7 +619,7 @@
     },
     {
         "id":  "level5_2025-1_data",
-        "title":  "2025 Session 1 Eiken Grade 5",
+        "title":  "英検5級2025－1",
         "dir":  "assets/level5/2025-1",
         "json":  "data.json",
         "audio":  [
@@ -658,7 +658,7 @@
     },
     {
         "id":  "level5_2024-3_data",
-        "title":  "2024 Session 3 Eiken Grade 5",
+        "title":  "英検5級2024－3",
         "dir":  "assets/level5/2024-3",
         "json":  "data.json",
         "audio":  [
@@ -697,7 +697,7 @@
     },
     {
         "id":  "level5_2024-2_data",
-        "title":  "2024 Session 2 Eiken Grade 5",
+        "title":  "英検5級2024－2",
         "dir":  "assets/level5/2024-2",
         "json":  "data.json",
         "audio":  [

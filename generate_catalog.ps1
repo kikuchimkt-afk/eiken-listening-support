@@ -26,9 +26,15 @@ foreach ($file in $projectFiles) {
         # Determine Title from directory structure (e.g., assets/level4/2025-2 -> 2025-2 Level4)
         $parts = $relativeDir -split "/"
         if ($parts.Count -ge 3) {
-           $title = $parts[-1] + " " + $parts[-2] # 2025-2 level4
+            $title = $parts[-1] + " " + $parts[-2] # 2025-2 level4
         }
-    } catch {
+        
+        # Use title from JSON if available (Allow manual override)
+        if ($jsonContent.title -and $jsonContent.title -ne "") {
+            $title = $jsonContent.title
+        }
+    }
+    catch {
         Write-Host "Error reading $($file.Name): $_"
         continue
     }
@@ -54,16 +60,16 @@ foreach ($file in $projectFiles) {
             $rangeEnd = $partNum * 10
         }
         elseif ($name -match "(\d+)-(\d+)") {
-             # if filename is like "No.1-10.mp3"
-             $rangeStart = [int]$matches[1]
-             $rangeEnd = [int]$matches[2]
-             $partNum = 1 # Treat as single part covering this range
+            # if filename is like "No.1-10.mp3"
+            $rangeStart = [int]$matches[1]
+            $rangeEnd = [int]$matches[2]
+            $partNum = 1 # Treat as single part covering this range
         }
 
         $audioConfig += @{
-            part = $partNum
+            part  = $partNum
             range = @($rangeStart, $rangeEnd)
-            file = $audio.Name
+            file  = $audio.Name
             label = $audio.Name.Replace(".mp3", "")
         }
     }
@@ -72,10 +78,10 @@ foreach ($file in $projectFiles) {
     $audioConfig = $audioConfig | Sort-Object { $_.range[0] }
 
     $catalog += @{
-        id = $dir.Name + "_" + $file.BaseName # Unique ID based on folder
+        id    = $relativeDir.Replace("/", "_").Replace("assets_", "") + "_" + $file.BaseName # Consistent ID with STEP2
         title = $title
-        dir = $relativeDir
-        json = $file.Name
+        dir   = $relativeDir
+        json  = $file.Name
         audio = $audioConfig
     }
 }
